@@ -1,0 +1,69 @@
+import 'package:fintrack/constants/constants.dart';
+import 'package:fintrack/screens/home/views/main_screen.dart';
+import 'package:flutter/material.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.home, color: ColorPallete.green),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.history, color: ColorPallete.white),
+            ),
+            const SizedBox(width: 48),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.attach_money, color: ColorPallete.white),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.person, color: ColorPallete.white),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Transform.translate(
+        offset: const Offset(0, 56),
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  ColorPallete.green,
+                  const Color(0xFFAEF26B),
+                  ColorPallete.greenLight,
+                ],
+              ),
+            ),
+            child: FloatingActionButton(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              onPressed: () {},
+              shape: const CircleBorder(),
+              child: Icon(
+                Icons.add,
+                size: 28
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: const MainScreen(),
+    );
+  }
+}
