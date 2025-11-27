@@ -3,8 +3,8 @@ import 'package:fintrack/constants/constants.dart';
 import 'package:fintrack/screens/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'presentation/auth/login_screen.dart';
-import 'presentation/auth/register_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});
@@ -14,11 +14,12 @@ class MyAppView extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "FinTrack",
-
-      // THEME PERBAIKAN – tidak override semua warna
       theme: ThemeData(
         useMaterial3: false,
-        textTheme: GoogleFonts.ubuntuTextTheme(),
+        textTheme: GoogleFonts.ubuntuTextTheme().apply(
+          displayColor: ColorPallete.white,
+          bodyColor: ColorPallete.white,
+        ),
         scaffoldBackgroundColor: Colors.transparent,
         colorScheme: ColorScheme.dark(
           primary: ColorPallete.green,
@@ -26,7 +27,6 @@ class MyAppView extends StatelessWidget {
         ),
       ),
 
-      // Background
       builder: (context, child) {
         return Container(
           decoration: const BoxDecoration(
@@ -41,7 +41,7 @@ class MyAppView extends StatelessWidget {
                 Color.fromRGBO(10, 16, 3, 0.2),
                 Color.fromRGBO(10, 16, 3, 0.0),
               ],
-              transform: GradientRotation(1 * (math.pi / 180)),
+              transform: GradientRotation(6* (math.pi / 180)),
             ),
           ),
           child: child,

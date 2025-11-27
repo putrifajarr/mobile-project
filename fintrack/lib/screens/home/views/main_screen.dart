@@ -67,16 +67,17 @@ class MainScreen extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF37732C),
-                    const Color(0xFF273F27),
-                    const Color(0xFF2D4C2D),
-                    const Color(0xFF459437),
+                    const Color.fromARGB(255, 62, 96, 39),
+                    const Color.fromARGB(255, 30, 50, 30),
+                    const Color.fromARGB(255, 25, 42, 25),
+                    const Color.fromARGB(255, 49, 102, 39),
                   ],
-                  transform: GradientRotation(218 * (math.pi / 180)),
+                  transform: GradientRotation(220 * (math.pi / 180)),
                 ),
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: Column(
+                spacing: 4,
                 children: [
                   Text(
                     "Total Uang",
@@ -115,6 +116,7 @@ class MainScreen extends StatelessWidget {
                           SizedBox(width: 12.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
                             children: [
                               Text(
                                 "Pendapatan",
@@ -153,6 +155,7 @@ class MainScreen extends StatelessWidget {
                           SizedBox(width: 12.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
                             children: [
                               Text(
                                 "Pengeluaran",
@@ -215,6 +218,7 @@ class MainScreen extends StatelessWidget {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
                     children: [
                       Text(
                         "Kebutuhan",
@@ -258,6 +262,7 @@ class MainScreen extends StatelessWidget {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
                     children: [
                       Text(
                         "Kebutuhan",
