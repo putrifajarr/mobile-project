@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 import 'package:fintrack/constants/constants.dart';
+import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:fintrack/screens/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});

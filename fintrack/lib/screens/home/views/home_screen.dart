@@ -1,12 +1,18 @@
 import 'package:fintrack/constants/constants.dart';
 import 'package:fintrack/screens/home/views/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
+    context.watch<TransactionProvider>();
+
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
         color: ColorPallete.black,
@@ -34,10 +40,8 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Transform.translate(
-        offset: const Offset(0, 56),
-        child: SizedBox(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SizedBox(
           width: 64,
           height: 64,
           child: Container(
@@ -54,16 +58,16 @@ class HomeScreen extends StatelessWidget {
             child: FloatingActionButton(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              onPressed: () {},
               shape: const CircleBorder(),
-              child: Icon(
-                Icons.add,
-                size: 28
-              ),
+              
+              onPressed:(){
+                Navigator.pushNamed(context, "/add");
+              }, 
+              child: const Icon(Icons.add, size: 28), 
             ),
           ),
         ),
-      ),
+      
       body: const MainScreen(),
     );
   }
