@@ -1,35 +1,82 @@
 import 'package:fintrack/constants/constants.dart';
+import 'package:fintrack/screens/anggaran/anggara.dart';
 import 'package:fintrack/screens/home/views/main_screen.dart';
+import 'package:fintrack/screens/profile/profile.dart';
+import 'package:fintrack/screens/stat/stat.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  var widgetList = [
+    const MainScreen(),
+    const StatScreen(),
+    const AnggaranScreen(),
+    const ProfileScreen(),
+  ];
+
+  int index = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: widgetList[index], 
       bottomNavigationBar: BottomAppBar(
         color: ColorPallete.black,
         shape: const CircularNotchedRectangle(),
+        padding: const EdgeInsets.only(top: 6.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.home, color: ColorPallete.green),
+              onPressed: () {
+                setState(() {
+                  index = 0;
+                });
+              },
+              icon: Icon(
+                Icons.home, 
+                color: index == 0 ? ColorPallete.green : ColorPallete.white
+              ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.history, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 1;
+                });
+              },
+              icon: Icon(
+                Icons.history, 
+                color: index == 1 ? ColorPallete.green : ColorPallete.white
+              ),
             ),
             const SizedBox(width: 48),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.attach_money, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 2;
+                });
+              },
+              icon: Icon(
+                Icons.attach_money, 
+                color: index == 2 ? ColorPallete.green : ColorPallete.white
+              ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 3;
+                });
+              },
+              icon: Icon(
+                Icons.person, 
+                color: index == 3 ? ColorPallete.green : ColorPallete.white
+              ),
             ),
           ],
         ),
@@ -50,21 +97,30 @@ class HomeScreen extends StatelessWidget {
                   ColorPallete.greenLight,
                 ],
               ),
+              boxShadow: [
+                 BoxShadow(
+                   color: ColorPallete.green.withOpacity(0.4),
+                   blurRadius: 10,
+                   spreadRadius: 2,
+                   offset: const Offset(0, -4)
+                 )
+              ]
             ),
             child: FloatingActionButton(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              onPressed: () {},
+              onPressed: () {
+              },
               shape: const CircleBorder(),
-              child: Icon(
+              child: const Icon(
                 Icons.add,
-                size: 28
+                size: 28,
+                color: ColorPallete.black,
               ),
             ),
           ),
         ),
       ),
-      body: const MainScreen(),
     );
   }
-}
+}   

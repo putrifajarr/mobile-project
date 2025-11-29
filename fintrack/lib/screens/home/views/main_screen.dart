@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fintrack/constants/constants.dart';
+import 'package:fintrack/data/data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +17,7 @@ class MainScreen extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center ,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Row(
                   children: [
@@ -58,19 +59,16 @@ class MainScreen extends StatelessWidget {
             SizedBox(height: 20.0),
             Container(
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 28
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 28),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color.fromARGB(255, 62, 96, 39),
-                    const Color.fromARGB(255, 30, 50, 30),
-                    const Color.fromARGB(255, 25, 42, 25),
-                    const Color.fromARGB(255, 49, 102, 39),
+                    const Color.fromARGB(255, 210, 247, 186),
+                    const Color.fromARGB(255, 184, 253, 131),
+                    const Color.fromRGBO(158, 250, 88, 1),
+                    const Color.fromARGB(255, 209, 255, 156),
                   ],
                   transform: GradientRotation(220 * (math.pi / 180)),
                 ),
@@ -80,16 +78,19 @@ class MainScreen extends StatelessWidget {
                 spacing: 4,
                 children: [
                   Text(
-                    "Total Uang",
+                    "Total Uang", 
                     style: TextStyle(
-                      fontSize: 16.0,
+                      fontSize: 18.0,
+                      color: ColorPallete.black,
+                      fontWeight: FontWeight.w600
                     ),
                   ),
                   Text(
                     "Rp1.000.000",
                     style: TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 30.0,
                       fontWeight: FontWeight.w600,
+                      color: ColorPallete.black,
                     ),
                   ),
                   SizedBox(height: 16.0),
@@ -109,9 +110,10 @@ class MainScreen extends StatelessWidget {
                               child: Icon(
                                 CupertinoIcons.arrow_down,
                                 color: const Color(0xFF2D4C2D),
-                                size: 18
-                              )
-                            )
+                                size: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                           SizedBox(width: 12.0),
                           Column(
@@ -122,17 +124,20 @@ class MainScreen extends StatelessWidget {
                                 "Pendapatan",
                                 style: TextStyle(
                                   fontSize: 16.0,
+                                  color: ColorPallete.black,
+                                  fontWeight: FontWeight.w500
                                 ),
                               ),
                               Text(
                                 "Rp100.000",
                                 style: TextStyle(
-                                  fontSize: 16.0,
+                                  fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
+                                  color: ColorPallete.black,
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                       Row(
@@ -147,10 +152,11 @@ class MainScreen extends StatelessWidget {
                             child: Center(
                               child: Icon(
                                 CupertinoIcons.arrow_up,
-                                color: const Color(0xFFD84747) ,
-                                size: 18
-                              )
-                            )
+                                color: const Color(0xFFD84747),
+                                size: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                           SizedBox(width: 12.0),
                           Column(
@@ -161,22 +167,24 @@ class MainScreen extends StatelessWidget {
                                 "Pengeluaran",
                                 style: TextStyle(
                                   fontSize: 16.0,
+                                  color: ColorPallete.black,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Text(
                                 "Rp100.000",
                                 style: TextStyle(
-                                  fontSize: 16.0,
+                                  fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
+                                  color: ColorPallete.black,
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
-                    ]
-                    
-                  )
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -187,110 +195,110 @@ class MainScreen extends StatelessWidget {
               children: [
                 Text(
                   "Transaksi Terbaru",
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w800),
                 ),
                 Text(
                   "Lihat semua",
                   style: TextStyle(
                     fontSize: 16.0,
-                    color: ColorPallete.greenLight,
+                    color: ColorPallete.green,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
-                  )
-                )
+                  ),
+                ),
               ],
             ),
-            SizedBox(height: 12.0),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                color: ColorPallete.black,
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        "Kebutuhan",
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
+            SizedBox(height: 20.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: transactionData.length,
+                itemBuilder: (context, int i) {
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 10.0),
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 24,
+                      top: 16,
+                      bottom: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ColorPallete.black,
+                      borderRadius: BorderRadius.circular(14.0),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          spacing: 12,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: ColorPallete.blackLight,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.emoji_food_beverage,
+                                  color: ColorPallete.white,
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 4,
+                              children: [
+                                Text(
+                                  transactionData[i]['category'] as String,
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  transactionData[i]['description'] as String,
+                                  style: TextStyle(
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        "Makan bakso",
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w300
-                        )
-                      )
-                    ]
-                  ),
-                  Text(
-                    "Rp 15.000",
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      // color: ColorPallete.greenLight
-                    )
-                  ),
-                ]
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            Text(
+                              transactionData[i]['totalAmount'] as String,
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                                color: ColorPallete.white,
+                              ),
+                            ),
+                            Text(
+                              transactionData[i]['date'] as String,
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w300,
+                                color: ColorPallete.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
             SizedBox(height: 12.0),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                color: ColorPallete.black,
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        "Kebutuhan",
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        "Makan bakso",
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w300
-                        )
-                      )
-                    ]
-                  ),
-                  Text(
-                    "Rp 15.000",
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      // color: ColorPallete.red,
-                    )
-                  ),
-                ]
-              ),
-            ),
           ],
         ),
       ),
