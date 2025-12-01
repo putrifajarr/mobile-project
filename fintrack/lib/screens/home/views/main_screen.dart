@@ -196,19 +196,6 @@ class MainScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                    ], 
-                  )
-                ],
-              ),
-            ),
-            SizedBox(height: 36.0),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "Transaksi Terbaru",
