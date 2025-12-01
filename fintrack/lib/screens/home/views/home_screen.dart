@@ -4,6 +4,9 @@ import 'package:fintrack/screens/home/views/main_screen.dart';
 import 'package:fintrack/screens/profile/profile.dart';
 import 'package:fintrack/screens/stat/stat.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,8 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    context.watch<TransactionProvider>();
+
     return Scaffold(
-      body: widgetList[index], 
       bottomNavigationBar: BottomAppBar(
         color: ColorPallete.black,
         shape: const CircularNotchedRectangle(),
@@ -34,57 +39,27 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 0;
-                });
-              },
-              icon: Icon(
-                Icons.home, 
-                color: index == 0 ? ColorPallete.green : ColorPallete.white
-              ),
+              onPressed: () {},
+              icon: const Icon(Icons.home, color: ColorPallete.green),
             ),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 1;
-                });
-              },
-              icon: Icon(
-                Icons.history, 
-                color: index == 1 ? ColorPallete.green : ColorPallete.white
-              ),
+              onPressed: () {},
+              icon: const Icon(Icons.history, color: ColorPallete.white),
             ),
             const SizedBox(width: 48),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 2;
-                });
-              },
-              icon: Icon(
-                Icons.attach_money, 
-                color: index == 2 ? ColorPallete.green : ColorPallete.white
-              ),
+              onPressed: () {},
+              icon: const Icon(Icons.attach_money, color: ColorPallete.white),
             ),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 3;
-                });
-              },
-              icon: Icon(
-                Icons.person, 
-                color: index == 3 ? ColorPallete.green : ColorPallete.white
-              ),
+              onPressed: () {},
+              icon: const Icon(Icons.person, color: ColorPallete.white),
             ),
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Transform.translate(
-        offset: const Offset(0, 56),
-        child: SizedBox(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SizedBox(
           width: 64,
           height: 64,
           child: Container(
@@ -97,30 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   ColorPallete.greenLight,
                 ],
               ),
-              boxShadow: [
-                 BoxShadow(
-                   color: ColorPallete.green.withOpacity(0.4),
-                   blurRadius: 10,
-                   spreadRadius: 2,
-                   offset: const Offset(0, -4)
-                 )
-              ]
             ),
             child: FloatingActionButton(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              onPressed: () {
-              },
               shape: const CircleBorder(),
-              child: const Icon(
-                Icons.add,
-                size: 28,
-                color: ColorPallete.black,
-              ),
+              
+              onPressed:(){
+                Navigator.pushNamed(context, "/add");
+              }, 
+              child: const Icon(Icons.add, size: 28), 
             ),
           ),
         ),
-      ),
+      
+      body: const MainScreen(),
     );
   }
-}   
+}
