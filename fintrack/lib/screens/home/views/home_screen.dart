@@ -3,6 +3,7 @@ import 'package:fintrack/screens/anggaran/anggaran.dart';
 import 'package:fintrack/screens/home/views/main_screen.dart';
 import 'package:fintrack/screens/profile/profile.dart';
 import 'package:fintrack/screens/stat/stat.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
@@ -43,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
               icon: Icon(
-                Icons.home,
+                CupertinoIcons.home,
                 color: index == 0 ? ColorPallete.green : ColorPallete.white,
               ),
             ),
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
               icon: Icon(
-                Icons.history,
+                CupertinoIcons.graph_square,
                 color: index == 1 ? ColorPallete.green : ColorPallete.white,
               ),
             ),
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
               icon: Icon(
-                Icons.person,
+                Icons.person_2_outlined,
                 color: index == 3 ? ColorPallete.green : ColorPallete.white,
               ),
             ),
