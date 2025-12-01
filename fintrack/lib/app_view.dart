@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+import 'package:fintrack/features/transaction/views/add_transaction_screen.dart';
 import 'package:fintrack/screens/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -55,6 +55,8 @@ class MyAppView extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/main': (context) => const HomeScreen(),
+        '/add': (context) => const AddTransactionScreen(),
+
       },
 
       home: const LoginScreen(),

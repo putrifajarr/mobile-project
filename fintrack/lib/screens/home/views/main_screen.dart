@@ -96,7 +96,7 @@ class MainScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Rp${totalUang}",
+                    "Rp$totalUang",
                     style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w600,
@@ -136,7 +136,7 @@ class MainScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "Rp${totalIncome}",
+                                "Rp$totalIncome",
                                 style: TextStyle(
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w600,
@@ -176,7 +176,7 @@ class MainScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "Rp${totalExpense}",
+                                "Rp$totalExpense",
                                 style: TextStyle(
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w600,
