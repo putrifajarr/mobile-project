@@ -6,11 +6,24 @@ class TransactionProvider with ChangeNotifier {
 
   List<TransactionModel> get transactions => _transactions;
 
-  get totalExpense => null;
+  // Total pemasukan
+  double get totalIncome {
+    return _transactions
+        .where((t) => t.type == 'income')
+        .fold(0, (sum, t) => sum + t.amount);
+  }
 
-  get totalIncome => null;
+  // Total pengeluaran
+  double get totalExpense {
+    return _transactions
+        .where((t) => t.type == 'expense')
+        .fold(0, (sum, t) => sum + t.amount);
+  }
 
-  get totalBalance => null;
+  // Total saldo
+  double get totalBalance {
+    return totalIncome - totalExpense;
+  }
 
   // CREATE
   void addTransaction(TransactionModel trx) {
