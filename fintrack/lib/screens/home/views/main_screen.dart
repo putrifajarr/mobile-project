@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/data/data.dart';
+// import 'package:fintrack/data/data.dart';
 import 'package:fintrack/utils/format_rupiah.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

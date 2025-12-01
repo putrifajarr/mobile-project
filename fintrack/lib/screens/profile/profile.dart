@@ -5,6 +5,11 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.0),
+
+      ),
+    );
   }
 }

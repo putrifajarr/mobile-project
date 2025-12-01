@@ -1,12 +1,11 @@
 import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/screens/anggaran/anggara.dart';
+import 'package:fintrack/screens/anggaran/anggaran.dart';
 import 'package:fintrack/screens/home/views/main_screen.dart';
 import 'package:fintrack/screens/profile/profile.dart';
 import 'package:fintrack/screens/stat/stat.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     context.watch<TransactionProvider>();
 
     return Scaffold(
@@ -39,54 +37,82 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.home, color: ColorPallete.green),
+              onPressed: () {
+                setState(() {
+                  index = 0;
+                });
+              },
+              icon: Icon(
+                Icons.home,
+                color: index == 0 ? ColorPallete.green : ColorPallete.white,
+              ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.history, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 1;
+                });
+              },
+              icon: Icon(
+                Icons.history,
+                color: index == 1 ? ColorPallete.green : ColorPallete.white,
+              ),
             ),
             const SizedBox(width: 48),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.attach_money, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 2;
+                });
+              },
+              icon: Icon(
+                Icons.attach_money,
+                color: index == 2 ? ColorPallete.green : ColorPallete.white,
+              ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person, color: ColorPallete.white),
+              onPressed: () {
+                setState(() {
+                  index = 3;
+                });
+              },
+              icon: Icon(
+                Icons.person,
+                color: index == 3 ? ColorPallete.green : ColorPallete.white,
+              ),
             ),
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: SizedBox(
-          width: 64,
-          height: 64,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  ColorPallete.green,
-                  const Color(0xFFAEF26B),
-                  ColorPallete.greenLight,
-                ],
-              ),
-            ),
-            child: FloatingActionButton(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              shape: const CircleBorder(),
-              
-              onPressed:(){
-                Navigator.pushNamed(context, "/add");
-              }, 
-              child: const Icon(Icons.add, size: 28), 
+        width: 64,
+        height: 64,
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                ColorPallete.green,
+                const Color(0xFFAEF26B),
+                ColorPallete.greenLight,
+              ],
             ),
           ),
+          child: FloatingActionButton(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shape: const CircleBorder(),
+
+            onPressed: () {
+              Navigator.pushNamed(context, "/add");
+            },
+            child: const Icon(Icons.add, size: 28),
+          ),
         ),
-      
-      body: const MainScreen(),
+      ),
+
+      body: widgetList[index],
     );
   }
 }
