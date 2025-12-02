@@ -1,11 +1,13 @@
 import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/screens/anggaran/anggaran.dart';
-import 'package:fintrack/screens/home/views/main_screen.dart';
-import 'package:fintrack/screens/profile/profile.dart';
-import 'package:fintrack/screens/stat/stat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // <--- fix CupertinoIcons
 import 'package:provider/provider.dart';
+
+import 'main_screen.dart';
+import 'stat.dart';
+import 'anggaran.dart';
+import 'profile.dart';
+
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int index = 0;
+
   var widgetList = [
     const MainScreen(),
     const StatScreen(),
@@ -23,11 +27,20 @@ class _HomeScreenState extends State<HomeScreen> {
     const ProfileScreen(),
   ];
 
-  int index = 0;
+  @override
+  void initState() {
+    super.initState();
+    // Fix use_build_context_synchronously warning
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if(mounted) {
+        context.read<TransactionProvider>().loadLatest();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<TransactionProvider>();
+    context.watch<TransactionProvider>(); // listen update
 
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
@@ -38,22 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 0;
-                });
-              },
+              onPressed: () => setState(() => index = 0),
               icon: Icon(
                 CupertinoIcons.home,
                 color: index == 0 ? ColorPallete.green : ColorPallete.white,
               ),
             ),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 1;
-                });
-              },
+              onPressed: () => setState(() => index = 1),
               icon: Icon(
                 CupertinoIcons.graph_square,
                 color: index == 1 ? ColorPallete.green : ColorPallete.white,
@@ -61,22 +66,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 48),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 2;
-                });
-              },
+              onPressed: () => setState(() => index = 2),
               icon: Icon(
                 Icons.attach_money,
                 color: index == 2 ? ColorPallete.green : ColorPallete.white,
               ),
             ),
             IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 3;
-                });
-              },
+              onPressed: () => setState(() => index = 3),
               icon: Icon(
                 Icons.person_2_outlined,
                 color: index == 3 ? ColorPallete.green : ColorPallete.white,
@@ -104,15 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             shape: const CircleBorder(),
-
-            onPressed: () {
-              Navigator.pushNamed(context, "/add");
-            },
+            onPressed: () => Navigator.pushNamed(context, "/add"),
             child: const Icon(Icons.add, size: 28),
           ),
         ),
       ),
-
       body: widgetList[index],
     );
   }

@@ -1,15 +1,29 @@
 import 'dart:math' as math;
 
 import 'package:fintrack/constants/constants.dart';
-// import 'package:fintrack/data/data.dart';
 import 'package:fintrack/utils/format_rupiah.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:provider/provider.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    /// 🔥 Load dari database saat layar dibuka
+    Future.microtask(() {
+      context.read<TransactionProvider>().loadLatest();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +38,7 @@ class MainScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
           children: [
+            // Bagian Header Tetap
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,6 +82,8 @@ class MainScreen extends StatelessWidget {
             ),
             SizedBox(height: 20.0),
 
+            // Summary Card (Saldo)
+
             Container(
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 28),
@@ -87,17 +104,13 @@ class MainScreen extends StatelessWidget {
               child: Column(
                 spacing: 4,
                 children: [
-                  Text(
-                    "Total Uang",
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      color: ColorPallete.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text("Total Uang",
+                      style: TextStyle(
+                          fontSize: 18.0,
+                          color: ColorPallete.black,
+                          fontWeight: FontWeight.w600)),
                   Text(
                     formatRupiah(totalUang),
-                    // "Rp0",
                     style: TextStyle(
                       fontSize: 30.0,
                       fontWeight: FontWeight.w600,
@@ -108,182 +121,98 @@ class MainScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // INCOME
                       Row(
                         children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD8F5C7),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Icon(
-                                CupertinoIcons.arrow_down,
-                                color: const Color(0xFF2D4C2D),
-                                size: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                          _circleIcon(CupertinoIcons.arrow_down, Color(0xFF2D4C2D)),
                           SizedBox(width: 12.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 4,
-                            children: [
-                              Text(
-                                "Pendapatan",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: ColorPallete.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                formatRupiah(totalIncome),
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: ColorPallete.black,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _summaryText("Pendapatan", totalIncome),
                         ],
                       ),
 
+                      // EXPENSE
                       Row(
                         children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD8F5C7),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Icon(
-                                CupertinoIcons.arrow_up,
-                                color: const Color(0xFFD84747),
-                                size: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                          _circleIcon(CupertinoIcons.arrow_up, Color(0xFFD84747)),
                           SizedBox(width: 12.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 4,
-                            children: [
-                              Text(
-                                "Pengeluaran",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: ColorPallete.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                formatRupiah(totalExpense),
-                                // "Rp0",
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: ColorPallete.black,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _summaryText("Pengeluaran", totalExpense),
                         ],
-                      ),
+                      )
                     ],
-                  ),
+                  )
                 ],
               ),
             ),
             SizedBox(height: 36.0),
 
+            // Transaksi terbaru
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Transaksi Terbaru",
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w800),
-                ),
-                Text(
-                  "Lihat semua",
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: ColorPallete.green,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
+                Text("Transaksi Terbaru",
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w800)),
+                Text("Lihat semua",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: ColorPallete.green,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    )),
               ],
             ),
             SizedBox(height: 16.0),
+
             Expanded(
               child: transaksi.isEmpty
-                  ? Text("Belum ada transaksi")
+                  ? Center(child: Text("Belum ada transaksi"))
                   : ListView.builder(
                       itemCount: transaksi.length,
-                      itemBuilder: (context, index) {
-                        final t = transaksi[index];
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorPallete.black,
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  Text(
-                                    t.category,
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    t.description,
-                                    style: const TextStyle(
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              Text(
-                                "Rp ${t.amount}",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: t.type == "income"
-                                      ? ColorPallete.greenLight
-                                      : ColorPallete.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
+                      itemBuilder: (context, i) {
+                        final t = transaksi[i];
+                        return _item(t.category, t.description, t.amount, t.type);
+                      }),
+            )
           ],
         ),
       ),
     );
   }
+
+  Widget _circleIcon(IconData icon, Color color) => Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(color: const Color(0xFFD8F5C7), shape: BoxShape.circle),
+        child: Center(child: Icon(icon, color: color, size: 18)),
+      );
+
+  Widget _summaryText(String label, double value) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(label,
+              style: TextStyle(fontSize: 16, color: ColorPallete.black, fontWeight: FontWeight.w500)),
+          Text(formatRupiah(value),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ColorPallete.black)),
+        ],
+      );
+
+  Widget _item(String category, String desc, double amount, String type) => Container(
+        margin: EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(color: ColorPallete.black, borderRadius: BorderRadius.circular(12)),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
+            Text(category, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(desc, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w300)),
+          ]),
+          Text(
+            "Rp $amount",
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: type == "income" ? ColorPallete.greenLight : ColorPallete.red),
+          ),
+        ]),
+      );
 }

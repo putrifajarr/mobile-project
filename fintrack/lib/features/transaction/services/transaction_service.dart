@@ -1,0 +1,48 @@
+import 'package:fintrack/core/supabase_config.dart';
+
+class TransactionService {
+  final supabase = SupabaseConfig.client;
+
+  Future<bool> addTransaction({
+    required String category,
+    required String description,
+    required double amount,
+    required String type,
+  }) async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return false;
+
+    final response = await supabase.from('transactions').insert({
+      'user_id': userId,
+      'category': category,
+      'description': description,
+      'amount': amount,
+      'type': type,
+      'date': DateTime.now().toIso8601String(),
+    });
+
+    print("INSERT RESPONSE → ${response.data}, ERROR → ${response.error?.message}");
+    return response.error == null;
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestTransactions() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final result = await supabase
+        .from('transactions')
+        .select()
+        .eq('user_id', userId)
+        .order('date', ascending: false)
+        .limit(10);
+
+    print("FETCH RESULT → $result");
+    return List<Map<String, dynamic>>.from(result as List);
+  }
+
+  Future<bool> deleteTransaction(String id) async {
+    final response = await supabase.from('transactions').delete().match({'id': id});
+    print("DELETE RESPONSE → ${response.data}, ERROR → ${response.error?.message}");
+    return response.error == null;
+  }
+}

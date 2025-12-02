@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:fintrack/features/transaction/models/transaction_model.dart';
-import 'package:provider/provider.dart'; 
-import 'package:uuid/uuid.dart'; 
-
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final bool isEdit;
@@ -26,6 +25,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void initState() {
     super.initState();
 
+    // Jika mode EDIT → preload data
     if (widget.isEdit && widget.existing != null) {
       selectedType = widget.existing!.type;
       selectedDate = widget.existing!.date;
@@ -48,7 +48,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: ListView(
           children: [
 
-            // PILIH TIPE
             Row(
               children: [
                 _typeChip("income", "Pemasukan"),
@@ -56,9 +55,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 _typeChip("expense", "Pengeluaran"),
               ],
             ),
+
             const SizedBox(height: 20),
 
-            // TANGGAL
             ListTile(
               title: const Text("Tanggal"),
               subtitle: Text("${selectedDate.toLocal()}".split(" ")[0]),
@@ -78,7 +77,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
             const SizedBox(height: 16),
 
-            // JUMLAH
             TextField(
               controller: amountController,
               keyboardType: TextInputType.number,
@@ -90,7 +88,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
             const SizedBox(height: 16),
 
-            // DESKRIPSI
             TextField(
               controller: descController,
               decoration: const InputDecoration(
@@ -101,7 +98,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
             const SizedBox(height: 16),
 
-            // KATEGORI
             DropdownButtonFormField(
               value: selectedCategory,
               items: ["Belanja", "Makanan", "Gaji", "Hiburan", "Lainnya"]
@@ -116,15 +112,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
             const SizedBox(height: 28),
 
-            // BUTTON SIMPAN
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: () {
-                _save(context);
-              },
+              onPressed: () => _save(context),
               child: Text(widget.isEdit ? "Simpan Perubahan" : "Tambah"),
             )
           ],
@@ -133,37 +126,46 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  // WIDGET CHIP JENIS TRANSAKSI
   Widget _typeChip(String value, String label) {
     return ChoiceChip(
       label: Text(label),
       selected: selectedType == value,
       selectedColor: Colors.green,
-      onSelected: (_) {
-        setState(() => selectedType = value);
-      },
+      onSelected: (_) => setState(() => selectedType = value),
     );
   }
 
-  // SIMPAN DATA
-  void _save(BuildContext context) {
-    final provider = Provider.of<TransactionProvider>(context, listen: false);
+  /// SIMPAN KE SUPABASE
+  void _save(BuildContext context) async {
+  final provider = Provider.of<TransactionProvider>(context, listen: false);
 
-    final trx = TransactionModel(
-      id: widget.isEdit ? widget.existing!.id : const Uuid().v4(),
-      type: selectedType,
-      date: selectedDate,
-      amount: double.tryParse(amountController.text) ?? 0,
-      description: descController.text,
-      category: selectedCategory,
+  final trx = TransactionModel(
+    id: widget.isEdit ? widget.existing!.id : const Uuid().v4(),
+    type: selectedType,
+    date: selectedDate,
+    amount: double.tryParse(amountController.text) ?? 0,
+    description: descController.text,
+    category: selectedCategory,
+  );
+
+  // =================== MODE EDIT (belum dibuat) ===================
+  if (widget.isEdit) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Fitur EDIT belum diimplementasi")),
     );
-
-    if (widget.isEdit) {
-      provider.updateTransaction(trx);
-    } else {
-      provider.addTransaction(trx);
-    }
-
-    Navigator.pop(context);
+    return;
   }
+
+  // =================== MODE TAMBAH ===================
+  await provider.add(trx);
+
+  // Context digunakan setelah await → harus `if (mounted)` DULU
+  if (!mounted) return;
+  provider.loadLatest();
+  Navigator.of(context).pop();
+  }
+
+
+
 }

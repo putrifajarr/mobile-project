@@ -1,7 +1,9 @@
-// import 'package:fintrack/home_screen.dart';
-import 'package:fintrack/app.dart';
 import 'package:flutter/material.dart';
+import 'core/supabase_config.dart';
+import 'app.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseConfig.init();
   runApp(const MyApp());
 }
