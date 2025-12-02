@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fintrack/constants/constants.dart';
 import 'package:fintrack/features/transaction/models/transaction_model.dart';
+// import 'package:fintrack/data/data.dart';
 import 'package:fintrack/utils/format_rupiah.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -359,10 +360,31 @@ class MainScreen extends StatelessWidget {
                 decoration: InputDecoration(labelText:"Deskripsi"),
               ),
               
-              TextField(
-                controller: _categoryController,
-                decoration: InputDecoration(labelText: "Kategori"),
+              // Dropdown kategori
+              DropdownButtonFormField<String>(
+                value: _categoryController.text,
+                decoration: InputDecoration(
+                  labelText: "Kategori",
+                ),
+                items: [
+                  "Belanja",
+                  "Makanan",
+                  "Gaji",
+                  "Hiburan",
+                  "Lainnya",
+                ].map((kategori) {
+                  return DropdownMenuItem(
+                    value: kategori,
+                    child: Text(kategori),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    _categoryController.text = value;
+                  }
+                },
               ),
+
               
               DropdownButton<String>(
                 value: _type,
@@ -404,7 +426,7 @@ class MainScreen extends StatelessWidget {
         ],
       );
     },
-    );
+  );
   }     
                   }
                       
