@@ -1,8 +1,8 @@
 import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/screens/anggaran/anggaran.dart';
+import 'package:fintrack/screens/anggaran/anggaran_screen.dart';
 import 'package:fintrack/screens/home/views/main_screen.dart';
-import 'package:fintrack/screens/profile/profile.dart';
-import 'package:fintrack/screens/stat/stat.dart';
+import 'package:fintrack/screens/profile/profile_screen.dart';
+import 'package:fintrack/screens/stat/stat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,59 +30,65 @@ class _HomeScreenState extends State<HomeScreen> {
     context.watch<TransactionProvider>();
 
     return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        color: ColorPallete.black,
-        shape: const CircularNotchedRectangle(),
-        padding: const EdgeInsets.only(top: 6.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 0;
-                });
-              },
-              icon: Icon(
-                CupertinoIcons.home,
-                color: index == 0 ? ColorPallete.green : ColorPallete.white,
+      bottomNavigationBar: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Color.fromARGB(255, 44, 44, 44), width: 0.8)),
+        ),
+        child: BottomAppBar(
+          color: ColorPallete.black,
+          shape: const CircularNotchedRectangle(),
+          padding: const EdgeInsets.only(top: 6.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    index = 0;
+                  });
+                },
+                icon: Icon(
+                  CupertinoIcons.home,
+                  color: index == 0 ? ColorPallete.green : ColorPallete.white,
+                ),
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 1;
-                });
-              },
-              icon: Icon(
-                CupertinoIcons.graph_square,
-                color: index == 1 ? ColorPallete.green : ColorPallete.white,
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    index = 1;
+                  });
+                },
+                icon: Icon(
+                  CupertinoIcons.graph_square,
+                  color: index == 1 ? ColorPallete.green : ColorPallete.white,
+                ),
               ),
-            ),
-            const SizedBox(width: 48),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 2;
-                });
-              },
-              icon: Icon(
-                Icons.attach_money,
-                color: index == 2 ? ColorPallete.green : ColorPallete.white,
+              const SizedBox(width: 48),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    index = 2;
+                  });
+                },
+                icon: Icon(
+                  Icons.attach_money,
+                  color: index == 2 ? ColorPallete.green : ColorPallete.white,
+                ),
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  index = 3;
-                });
-              },
-              icon: Icon(
-                Icons.person_2_outlined,
-                color: index == 3 ? ColorPallete.green : ColorPallete.white,
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    index = 3;
+                  });
+                },
+                icon: Icon(
+                  Icons.person_2_outlined,
+                  color: index == 3 ? ColorPallete.green : ColorPallete.white,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
