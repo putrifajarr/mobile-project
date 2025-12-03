@@ -120,8 +120,7 @@ class NotificationScreen extends StatelessWidget {
         iconBgColor = Colors.orangeAccent.withOpacity(0.1);
         break;
       case NotificationType.info:
-      default:
-        iconData = Icons.notifications;
+      iconData = Icons.notifications;
         iconColor = Colors.blueAccent;
         iconBgColor = Colors.blueAccent.withOpacity(0.1);
         break;

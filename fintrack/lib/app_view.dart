@@ -1,6 +1,5 @@
 import 'package:fintrack/constants/constants.dart';
 import 'package:fintrack/features/transaction/views/add_transaction_screen.dart';
-import 'package:fintrack/features/transaction/views/add_transaction_screen.dart';
 import 'package:fintrack/screens/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

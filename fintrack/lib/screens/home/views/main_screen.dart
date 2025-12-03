@@ -10,7 +10,7 @@ import 'package:fintrack/widgets/empty_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
-import 'package:fintrack/features/transaction/widgets/edit_transaction_dialog.dart';
+import 'package:fintrack/features/transaction/views/add_transaction_screen.dart';
 import 'package:fintrack/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -292,8 +292,17 @@ class MainScreen extends StatelessWidget {
                           final t = transaksi[index];
                           return HistoryItem(
                             transaction: t,
-                            onEdit: () =>
-                                showEditTransactionDialog(context, t, provider),
+                            onEdit: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddTransactionScreen(
+                                    isEdit: true,
+                                    existing: t,
+                                  ),
+                                ),
+                              );
+                            },
                             onDelete: () => provider.deleteTransaction(t.id),
                           );
                         },
