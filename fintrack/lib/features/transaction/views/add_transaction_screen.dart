@@ -1,9 +1,10 @@
+import 'package:fintrack/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:fintrack/features/transaction/models/transaction_model.dart';
-import 'package:provider/provider.dart'; 
-import 'package:uuid/uuid.dart'; 
-
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final bool isEdit;
@@ -38,115 +39,307 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorPallete.black,
       appBar: AppBar(
-        title: Text(widget.isEdit ? "Edit Transaksi" : "Tambah Transaksi"),
-        backgroundColor: Colors.green[700],
+        backgroundColor: ColorPallete.black,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: ColorPallete.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.isEdit ? "Edit Transaksi" : "Tambah Transaksi",
+          style: const TextStyle(
+            color: ColorPallete.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // PILIH TIPE
-            Row(
-              children: [
-                _typeChip("income", "Pemasukan"),
-                const SizedBox(width: 8),
-                _typeChip("expense", "Pengeluaran"),
-              ],
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: ColorPallete.blackLight,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _typeButton("income", "Pemasukan")),
+                  Expanded(child: _typeButton("expense", "Pengeluaran")),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // TANGGAL
-            ListTile(
-              title: const Text("Tanggal"),
-              subtitle: Text("${selectedDate.toLocal()}".split(" ")[0]),
-              trailing: const Icon(Icons.calendar_month),
+            const Text(
+              "Tanggal",
+              style: TextStyle(
+                color: ColorPallete.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
               onTap: () async {
                 DateTime? picked = await showDatePicker(
                   context: context,
                   initialDate: selectedDate,
                   firstDate: DateTime(2020),
                   lastDate: DateTime(2030),
+                  builder: (context, child) {
+                    return Theme(
+                      data: ThemeData.dark().copyWith(
+                        colorScheme: const ColorScheme.dark(
+                          primary: ColorPallete.green,
+                          onPrimary: ColorPallete.black,
+                          surface: ColorPallete.blackLight,
+                          onSurface: ColorPallete.white,
+                        ),
+                        dialogBackgroundColor: ColorPallete.blackLight,
+                      ),
+                      child: child!,
+                    );
+                  },
                 );
                 if (picked != null) {
                   setState(() => selectedDate = picked);
                 }
               },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ColorPallete.blackLight,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      color: ColorPallete.green,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      DateFormat(
+                        'EEEE, d MMMM yyyy',
+                        'id_ID',
+                      ).format(selectedDate),
+                      style: const TextStyle(
+                        color: ColorPallete.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // JUMLAH
-            TextField(
+            const Text(
+              "Jumlah",
+              style: TextStyle(
+                color: ColorPallete.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _customTextField(
               controller: amountController,
+              hint: "0",
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Jumlah",
-                border: OutlineInputBorder(),
+              prefix: const Text(
+                "Rp ",
+                style: TextStyle(
+                  color: ColorPallete.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // DESKRIPSI
-            TextField(
+            const Text(
+              "Kategori",
+              style: TextStyle(
+                color: ColorPallete.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: ColorPallete.blackLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedCategory,
+                  dropdownColor: ColorPallete.blackLight,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: ColorPallete.grey,
+                  ),
+                  isExpanded: true,
+                  style: const TextStyle(
+                    color: ColorPallete.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  items: ["Belanja", "Makanan", "Gaji", "Hiburan", "Lainnya"]
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (v) => setState(() => selectedCategory = v!),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              "Keterangan",
+              style: TextStyle(
+                color: ColorPallete.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _customTextField(
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: "Keterangan",
-                border: OutlineInputBorder(),
-              ),
+              hint: "Tulis keterangan...",
+              maxLines: 3,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 36),
 
-            // KATEGORI
-            DropdownButtonFormField(
-              value: selectedCategory,
-              items: ["Belanja", "Makanan", "Gaji", "Hiburan", "Lainnya"]
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              decoration: const InputDecoration(
-                labelText: "Kategori",
-                border: OutlineInputBorder(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorPallete.green,
+                  foregroundColor: ColorPallete.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: () => _save(context),
+                child: Text(
+                  widget.isEdit ? "Simpan Perubahan" : "Simpan Transaksi",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
-              onChanged: (v) => setState(() => selectedCategory = v!),
             ),
-
-            const SizedBox(height: 28),
-
-            // BUTTON SIMPAN
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: () {
-                _save(context);
-              },
-              child: Text(widget.isEdit ? "Simpan Perubahan" : "Tambah"),
-            )
           ],
         ),
       ),
     );
   }
 
-  // WIDGET CHIP JENIS TRANSAKSI
-  Widget _typeChip(String value, String label) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selectedType == value,
-      selectedColor: Colors.green,
-      onSelected: (_) {
-        setState(() => selectedType = value);
-      },
+  Widget _typeButton(String value, String label) {
+    bool isSelected = selectedType == value;
+
+    final Color activeColor =
+        value == "expense" ? Colors.red : ColorPallete.green;
+
+    return GestureDetector(
+      onTap: () => setState(() => selectedType = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? activeColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? (value == "expense" ? Colors.white : ColorPallete.black)
+                : ColorPallete.grey,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
     );
   }
 
-  // SIMPAN DATA
+  Widget _customTextField({
+    required TextEditingController controller,
+    String? hint,
+    TextInputType? keyboardType,
+    Widget? prefix,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: const TextStyle(color: ColorPallete.white, fontSize: 16),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: ColorPallete.blackLight,
+        hintText: hint,
+        hintStyle: const TextStyle(color: ColorPallete.grey),
+        prefixIcon: prefix != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: 16, right: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [prefix],
+                ),
+              )
+            : null,
+        contentPadding: const EdgeInsets.all(16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: ColorPallete.green, width: 1),
+        ),
+      ),
+    );
+  }
+
   void _save(BuildContext context) {
+    if (amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Jumlah tidak boleh kosong",
+            style: TextStyle(color: ColorPallete.white),
+          ),
+          backgroundColor: const Color(0xFFFF5145),
+        ),
+      );
+      return;
+    }
+
     final provider = Provider.of<TransactionProvider>(context, listen: false);
 
     final trx = TransactionModel(
