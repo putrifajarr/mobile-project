@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+import 'package:fintrack/features/auth/provider/user_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,10 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Fix use_build_context_synchronously warning
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<TransactionProvider>().loadLatest();
+        context.read<UserProvider>().loadUserData();
       }
     });
   }

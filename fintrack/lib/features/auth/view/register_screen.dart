@@ -148,6 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 26),
@@ -160,11 +161,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 140,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF9CFF57), Color(0xFF76C63A)],
-                    ),
+                    color: Colors.black,
                     image: const DecorationImage(
-                      image: AssetImage('assets/logo.png'),
+                      image: AssetImage('assets/logo-app.png'),
                       fit: BoxFit.cover,
                     ),
                   ),

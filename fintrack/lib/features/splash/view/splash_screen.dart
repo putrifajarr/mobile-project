@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
 import 'package:fintrack/core/supabase_config.dart';
-
+import 'package:fintrack/features/auth/provider/user_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -40,16 +41,16 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  void _navigateAttempt() async {
-    // Only navigate once video is done.
-    // Also we need to know WHERE to navigate (Home or Login)
-
-    // Check Supabase Session
+  Future<void> _navigateAttempt() async {
     final session = SupabaseConfig.client.auth.currentSession;
 
     if (mounted) {
       if (session != null) {
-        Navigator.pushReplacementNamed(context, '/main');
+        debugPrint("Session found! Loading user data...");
+        await context.read<UserProvider>().loadUserData();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main');
+        }
       } else {
         Navigator.pushReplacementNamed(context, '/login');
       }

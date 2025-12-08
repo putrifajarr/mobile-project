@@ -24,15 +24,13 @@ class UserProvider extends ChangeNotifier {
             .from('users')
             .select()
             .eq('id', user.id)
-            .maybeSingle(); // Use maybeSingle to avoid exception if row missing
+            .maybeSingle();
 
         if (data != null) {
           _username = data['name'] ?? "User";
           _profilePhotoUrl = data['photo_url'];
           _profilePhoto = null;
         } else {
-          // Row missing. Could maintain default "Hamba Allah" or try to create it?
-          // Let's keep defaults. The upsert methods will create it on first edit.
           print("DEBUG: User row not found in table. Using defaults.");
         }
       } catch (e) {
