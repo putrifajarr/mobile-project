@@ -1,8 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:fintrack/core/constants/constants.dart';
-
-// ignore: unused_import
 import 'package:fintrack/features/transaction/view/history/history_screen.dart';
 import 'package:fintrack/features/notification/view/notification_screen.dart';
 import 'package:fintrack/core/utils/format_rupiah.dart';
@@ -103,12 +101,12 @@ class _MainScreenState extends State<MainScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color.fromARGB(255, 210, 247, 186),
-                    const Color.fromARGB(255, 184, 253, 131),
-                    const Color.fromRGBO(158, 250, 88, 1),
-                    const Color.fromARGB(255, 209, 255, 156),
+                    const Color.fromARGB(255, 233, 254, 220),
+                    const Color.fromARGB(255, 179, 255, 116),
+                    const Color.fromARGB(255, 166, 255, 103),
+                    const Color.fromARGB(255, 218, 255, 177),
                   ],
-                  transform: GradientRotation(220 * (math.pi / 180)),
+                  transform: GradientRotation(200 * (math.pi / 180)),
                 ),
                 borderRadius: BorderRadius.circular(20.0),
               ),

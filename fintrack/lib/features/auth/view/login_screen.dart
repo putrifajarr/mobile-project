@@ -23,29 +23,27 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-
-                // LOGO / ICON
                 Container(
-  width: 90,
-  height: 90,
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    gradient: const LinearGradient(
-      colors: [Color(0xFF9CFF57), Color(0xFF76C63A)],
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.greenAccent.withOpacity(0.3),
-        blurRadius: 12,
-        spreadRadius: 2,
-      )
-    ],
-    image: const DecorationImage(
-      image: AssetImage('assets/logo.png'),
-      fit: BoxFit.cover,
-    ),
-  ),
-),
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF9CFF57), Color(0xFF76C63A)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.greenAccent.withOpacity(0.3),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/logo.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 26),
 
@@ -68,21 +66,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // FORM CARD GLASSMORPHISM
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.white.withOpacity(0.08),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.15),
-                    ),
+                    border: Border.all(color: Colors.white.withOpacity(0.15)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
-                      )
+                      ),
                     ],
                   ),
                   child: Column(
@@ -114,8 +109,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             elevation: 6,
-                            shadowColor:
-                                const Color(0xFF9CFF57).withOpacity(0.5),
+                            shadowColor: const Color(
+                              0xFF9CFF57,
+                            ).withOpacity(0.5),
                           ),
                           onPressed: () {
                             Navigator.pushReplacementNamed(context, '/main');
@@ -142,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: TextDecoration.underline,
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

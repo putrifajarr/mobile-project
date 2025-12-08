@@ -1,6 +1,6 @@
 class TransactionModel {
   String id;
-  String type; // income / expense
+  String type; 
   DateTime date;
   double amount;
   String description;
