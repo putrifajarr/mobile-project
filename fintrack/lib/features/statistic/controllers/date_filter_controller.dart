@@ -11,8 +11,6 @@ class DateFilterController extends ChangeNotifier {
 
   void setPeriod(StatPeriod period) {
     _period = period;
-    // Reset date to now or keep specific logic when switching?
-    // Usually convenient to reset to "Current" frame of the new period.
     _selectedDate = DateTime.now();
     notifyListeners();
   }
@@ -48,7 +46,6 @@ class DateFilterController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Helper to get the start/end of the current period for data filtering
   DateTimeRange get currentRange {
     final date = _selectedDate;
     DateTime start;
@@ -56,7 +53,6 @@ class DateFilterController extends ChangeNotifier {
 
     switch (_period) {
       case StatPeriod.weekly:
-        // Assume week starts on Monday
         start = date.subtract(Duration(days: date.weekday - 1));
         end = start.add(const Duration(days: 6));
         break;
@@ -70,7 +66,6 @@ class DateFilterController extends ChangeNotifier {
         break;
     }
 
-    // Enhance end to be end of day
     end = DateTime(end.year, end.month, end.day, 23, 59, 59);
     return DateTimeRange(start: start, end: end);
   }

@@ -66,14 +66,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Match app theme
+      backgroundColor: Colors.black,
       body: Center(
         child: _initialized
             ? AspectRatio(
                 aspectRatio: _controller.value.aspectRatio,
                 child: VideoPlayer(_controller),
               )
-            : const SizedBox(), // Or a loader/logo image while video prepares
+            : const SizedBox(),
       ),
     );
   }

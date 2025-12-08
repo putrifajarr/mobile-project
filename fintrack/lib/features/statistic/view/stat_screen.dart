@@ -1,4 +1,6 @@
 import 'package:fintrack/core/constants/constants.dart';
+import 'package:fintrack/features/transaction/models/transaction_model.dart';
+import 'package:fintrack/features/transaction/services/transaction_service.dart';
 import 'package:fintrack/features/transaction/view/history/history_screen.dart';
 import 'package:fintrack/features/statistic/widgets/bar_chart.dart';
 import 'package:fintrack/features/statistic/controllers/date_filter_controller.dart';
@@ -15,17 +17,138 @@ class StatScreen extends StatefulWidget {
 
 class _StatScreenState extends State<StatScreen> {
   late final DateFilterController _controller;
+  bool _isLoading = false;
+  List<double> _incomeData = [];
+  List<double> _expenseData = [];
+  List<CategoryStatData> _pieData = [];
+
+  final TransactionService _service = TransactionService();
 
   @override
   void initState() {
     super.initState();
     _controller = DateFilterController();
+    _controller.addListener(_fetchData);
+    _fetchData();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_fetchData);
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchData() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final range = _controller.currentRange;
+      final transactions = await _service.getTransactionsInRange(
+        range.start,
+        range.end,
+      );
+      _processData(transactions);
+    } catch (e) {
+      debugPrint('Error fetching statistics: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _processData(List<TransactionModel> transactions) {
+    List<double> incomeBuckets;
+    List<double> expenseBuckets;
+
+    // Initialize buckets based on period
+    if (_controller.period == StatPeriod.weekly) {
+      incomeBuckets = List.filled(7, 0.0);
+      expenseBuckets = List.filled(7, 0.0);
+    } else if (_controller.period == StatPeriod.monthly) {
+      incomeBuckets = List.filled(5, 0.0);
+      expenseBuckets = List.filled(5, 0.0);
+    } else {
+      // Yearly
+      incomeBuckets = List.filled(12, 0.0);
+      expenseBuckets = List.filled(12, 0.0);
+    }
+
+    // Pie Chart Data
+    final Map<String, double> categoryDistribution = {};
+
+    for (var t in transactions) {
+      final type = t.category?.type;
+      final amount = t.amount;
+      final date = t.date;
+
+      // Pie Chart Data
+      final catName = t.category?.name ?? 'Lainnya';
+      categoryDistribution[catName] =
+          (categoryDistribution[catName] ?? 0) + amount;
+
+      // Bar Chart Data
+      int index = -1;
+      if (_controller.period == StatPeriod.weekly) {
+        index = date.weekday - 1;
+      } else if (_controller.period == StatPeriod.monthly) {
+        index = (date.day - 1) ~/ 7;
+        if (index > 4) index = 4;
+      } else {
+        index = date.month - 1;
+      }
+
+      if (index >= 0 && index < incomeBuckets.length) {
+        if (type == 'income') {
+          incomeBuckets[index] += amount;
+        } else if (type == 'expense') {
+          expenseBuckets[index] += amount;
+        }
+      }
+    }
+
+    // Process Pie Data into View Objects
+    final totalAmount = categoryDistribution.values.fold(0.0, (a, b) => a + b);
+    final List<CategoryStatData> finalPieData = [];
+    final colors = [
+      ColorPallete.green,
+      ColorPallete.red,
+      ColorPallete.blue,
+      ColorPallete.yellow,
+      Colors.purple,
+      Colors.orange,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.cyan,
+    ];
+    int colorIdx = 0;
+
+    categoryDistribution.forEach((name, amount) {
+      if (totalAmount > 0) {
+        final percentage = (amount / totalAmount) * 100;
+        finalPieData.add(
+          CategoryStatData(
+            name: name,
+            amount: amount,
+            color: colors[colorIdx % colors.length],
+            percentage: percentage,
+          ),
+        );
+        colorIdx++;
+      }
+    });
+
+    // Sort Pie Data by percentage descending
+    finalPieData.sort((a, b) => b.percentage.compareTo(a.percentage));
+
+    if (mounted) {
+      setState(() {
+        _incomeData = incomeBuckets;
+        _expenseData = expenseBuckets;
+        _pieData = finalPieData;
+      });
+    }
   }
 
   @override
@@ -78,11 +201,10 @@ class _StatScreenState extends State<StatScreen> {
               ),
             ),
 
-            // Sticky Filter Header
-            // Filter Section (Non-sticky)
+            // Header Date Filter
             SliverToBoxAdapter(
               child: Container(
-                color: ColorPallete.black, // Match background
+                color: ColorPallete.black,
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ListenableBuilder(
                   listenable: _controller,
@@ -92,75 +214,80 @@ class _StatScreenState extends State<StatScreen> {
               ),
             ),
 
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: ColorPallete.blackLight,
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Overview",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+            if (_isLoading)
+              const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(color: ColorPallete.green),
+                ),
+              )
+            else
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    // Overview Chart
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ColorPallete.blackLight,
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Overview",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        // Pass controller state if needed for reactivity
-                        ListenableBuilder(
-                          listenable: _controller,
-                          builder: (context, _) {
-                            // Here passing isWeekly just to show reactivity logic possibility
-                            return AspectRatio(
-                              aspectRatio: 1.6,
-                              child: MyChart(
-                                isWeekly:
-                                    _controller.period == StatPeriod.weekly,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: ColorPallete.blackLight,
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Per kategori",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 20),
+                          AspectRatio(
+                            aspectRatio: 1.6,
+                            child: MyChart(
+                              period: _controller.period,
+                              incomeData: _incomeData,
+                              expenseData: _expenseData,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        MyPieChart(),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 80), // Bottom padding
-                ],
+                    const SizedBox(height: 20.0),
+
+                    // Pie Chart Section
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ColorPallete.blackLight,
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Per kategori",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          MyPieChart(data: _pieData),
+                        ],
+                      ),
+                    ),
+                    // Bottom padding for scrolling
+                    const SizedBox(height: 80),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

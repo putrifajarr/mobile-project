@@ -1,6 +1,7 @@
 import 'package:fintrack/core/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/category_model.dart';
+import '../models/transaction_model.dart';
 
 class TransactionService {
   SupabaseClient get supabase => SupabaseConfig.client;
@@ -44,6 +45,7 @@ class TransactionService {
           .select('*, master_categories(id, name, type)')
           .eq('user_id', userId)
           .order('date', ascending: false)
+          .order('created_at', ascending: false)
           .limit(50); // Increased limit for better visibility
 
       // print("FETCH RESULT → $result");
@@ -86,6 +88,21 @@ class TransactionService {
       print("DEBUG: updateTransaction - Error: $e");
       return false;
     }
+  }
+
+  Future<List<TransactionModel>> getTransactionsInRange(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final response = await supabase
+        .from('transactions')
+        .select('*, master_categories(id, name, type)')
+        .gte('date', start.toIso8601String())
+        .lte('date', end.toIso8601String())
+        .order('date', ascending: true);
+
+    final data = response as List<dynamic>;
+    return data.map((e) => TransactionModel.fromJson(e)).toList();
   }
 
   Future<List<CategoryModel>> getCategories() async {

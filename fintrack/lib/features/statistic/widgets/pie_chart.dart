@@ -1,9 +1,24 @@
-import 'package:fintrack/core/constants/constants.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+class CategoryStatData {
+  final String name;
+  final double amount;
+  final Color color;
+  final double percentage;
+
+  CategoryStatData({
+    required this.name,
+    required this.amount,
+    required this.color,
+    required this.percentage,
+  });
+}
+
 class MyPieChart extends StatefulWidget {
-  const MyPieChart({super.key});
+  final List<CategoryStatData> data;
+
+  const MyPieChart({super.key, required this.data});
 
   @override
   State<StatefulWidget> createState() => MyPieChartState();
@@ -14,12 +29,25 @@ class MyPieChartState extends State<MyPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.data.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        child: Center(
+          child: Text(
+            "Tidak ada pengeluaran",
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      );
+    }
+
     return AspectRatio(
       aspectRatio: 1.3,
       child: Row(
         children: <Widget>[
           const SizedBox(height: 18),
           Expanded(
+            flex: 3,
             child: AspectRatio(
               aspectRatio: 1,
               child: PieChart(
@@ -48,18 +76,21 @@ class MyPieChartState extends State<MyPieChart> {
             ),
           ),
           const SizedBox(width: 24),
-          const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ChartLegendIndicator(color: ColorPallete.green, text: 'Matcha'),
-              SizedBox(height: 8),
-              ChartLegendIndicator(color: ColorPallete.red, text: 'Jajan'),
-              SizedBox(height: 8),
-              ChartLegendIndicator(color: ColorPallete.blue, text: 'Tabungan'),
-              SizedBox(height: 8),
-              ChartLegendIndicator(color: ColorPallete.yellow, text: 'Daily'),
-            ],
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: widget.data.map((e) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ChartLegendIndicator(
+                    color: e.color,
+                    text: '${e.name} (${e.percentage.toStringAsFixed(0)}%)',
+                  ),
+                );
+              }).toList(),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -68,58 +99,22 @@ class MyPieChartState extends State<MyPieChart> {
   }
 
   List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
+    return List.generate(widget.data.length, (i) {
       final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 20.0 : 14.0;
       final radius = isTouched ? 65.0 : 55.0;
+      final item = widget.data[i];
 
-      return switch (i) {
-        0 => PieChartSectionData(
-          color: ColorPallete.green,
-          value: 40,
-          title: '40%',
-          radius: radius,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: ColorPallete.black,
-          ),
+      return PieChartSectionData(
+        color: item.color,
+        value: item.percentage,
+        title: '${item.percentage.toStringAsFixed(0)}%',
+        radius: radius,
+        titleStyle: TextStyle(
+          fontSize: isTouched ? 16.0 : 12.0,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
         ),
-        1 => PieChartSectionData(
-          color: ColorPallete.red,
-          value: 30,
-          title: '30%',
-          radius: radius,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: ColorPallete.black,
-          ),
-        ),
-        2 => PieChartSectionData(
-          color: ColorPallete.blue,
-          value: 15,
-          title: '15%',
-          radius: radius,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: ColorPallete.black,
-          ),
-        ),
-        3 => PieChartSectionData(
-          color: ColorPallete.yellow,
-          value: 15,
-          title: '15%',
-          radius: radius,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: ColorPallete.black,
-          ),
-        ),
-        _ => throw StateError('Invalid'),
-      };
+      );
     });
   }
 }
@@ -148,12 +143,15 @@ class ChartLegendIndicator extends StatelessWidget {
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor ?? Colors.white70,
+        Expanded(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: textColor ?? Colors.white70,
+            ),
           ),
         ),
       ],
