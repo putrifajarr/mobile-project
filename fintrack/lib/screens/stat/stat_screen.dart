@@ -23,7 +23,7 @@ class StatScreen extends StatelessWidget {
                   Text(
                     "Statistik",
                     style: TextStyle(
-                      fontSize: 28.0,
+                      fontSize: 26.0,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),

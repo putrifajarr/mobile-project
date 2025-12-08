@@ -30,7 +30,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (widget.isEdit && widget.existing != null) {
       selectedType = widget.existing!.type;
       selectedDate = widget.existing!.date;
-      amountController.text = widget.existing!.amount.toString();
+      amountController.text = NumberFormat.decimalPattern(
+        'id_ID',
+      ).format(widget.existing!.amount.toInt());
       descController.text = widget.existing!.description;
       selectedCategory = widget.existing!.category;
     }
@@ -165,6 +167,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              onChanged: (v) {
+                // Remove all non-digit characters
+                String digits = v.replaceAll(RegExp(r'[^0-9]'), '');
+
+                if (digits.isEmpty) {
+                  amountController.value = TextEditingValue.empty;
+                  return;
+                }
+
+                // Parse and format
+                final number = int.tryParse(digits) ?? 0;
+                final formatted = NumberFormat.decimalPattern(
+                  'id_ID',
+                ).format(number);
+
+                // Update only if different to avoid cursor jumping loops
+                if (v != formatted) {
+                  amountController.value = TextEditingValue(
+                    text: formatted,
+                    selection: TextSelection.collapsed(
+                      offset: formatted.length,
+                    ),
+                  );
+                }
+              },
             ),
 
             const SizedBox(height: 20),
@@ -256,8 +283,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _typeButton(String value, String label) {
     bool isSelected = selectedType == value;
 
-    final Color activeColor =
-        value == "expense" ? Colors.red : ColorPallete.green;
+    final Color activeColor = value == "expense"
+        ? Colors.red
+        : ColorPallete.green;
 
     return GestureDetector(
       onTap: () => setState(() => selectedType = value),
@@ -289,11 +317,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     TextInputType? keyboardType,
     Widget? prefix,
     int maxLines = 1,
+    void Function(String)? onChanged,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      onChanged: onChanged,
       style: const TextStyle(color: ColorPallete.white, fontSize: 16),
       decoration: InputDecoration(
         filled: true,
@@ -346,7 +376,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       id: widget.isEdit ? widget.existing!.id : const Uuid().v4(),
       type: selectedType,
       date: selectedDate,
-      amount: double.tryParse(amountController.text) ?? 0,
+      amount:
+          double.tryParse(
+            amountController.text.replaceAll('.', '').replaceAll(',', ''),
+          ) ??
+          0,
       description: descController.text,
       category: selectedCategory,
     );
@@ -355,6 +389,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       provider.updateTransaction(trx);
     } else {
       provider.addTransaction(trx);
+      provider.updateBudgetFromTransaction(trx);
     }
 
     Navigator.pop(context);

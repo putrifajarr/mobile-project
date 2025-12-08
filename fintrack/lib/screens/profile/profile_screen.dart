@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
                   "Profil Saya",
                   style: TextStyle(
                     color: ColorPallete.white,
-                    fontSize: 28.0,
+                    fontSize: 26.0,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
