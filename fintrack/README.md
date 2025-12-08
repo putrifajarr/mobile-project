@@ -1,16 +1,45 @@
-# fintrack
+# FinTrack - Personal Finance Manager
 
-A new Flutter project.
+FinTrack is a comprehensive mobile application built with Flutter designed to help users efficiently manage their personal finances through expense tracking, budgeting, and visual analytics, powered by Supabase for real-time data persistence.
 
-## Getting Started
+## Tech Stack
 
-This project is a starting point for a Flutter application.
+*   **Framework:** Flutter
+*   **Language:** Dart
+*   **Backend & Auth:** Supabase
+*   **State Management:** Provider
+*   **Charts:** fl_chart
+*   **Fonts:** Google Fonts
 
-A few resources to get you started if this is your first Flutter project:
+## Prerequisites
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Ensure you have the following installed on your local machine:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+*   [Flutter SDK](https://docs.flutter.dev/get-started/install) (Latest Stable)
+*   [Dart SDK](https://dart.dev/get-dart)
+
+## Installation & Setup
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/fintrack.git
+    cd fintrack
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    flutter pub get
+    ```
+
+3.  **Run the application**
+    ```bash
+    flutter run
+    ```
+
+## Key Features
+
+*   **Secure Authentication:** User registration and login powered by Supabase Auth.
+*   **Transaction Management:** Easily record income and expenses with detailed categories.
+*   **Budget Planning:** Set and monitor monthly budgets to avoid overspending.
+*   **Visual Analytics:** Interactive charts and graphs (Pie and Bar) to analyze financial habits.
+*   **Profile Customization:** Manage user profile details including avatars.

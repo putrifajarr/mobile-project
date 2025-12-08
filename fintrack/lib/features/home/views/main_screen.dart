@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:fintrack/core/constants/constants.dart';
 import 'package:fintrack/features/auth/provider/user_provider.dart';
 import 'package:fintrack/features/transaction/view/history/history_screen.dart';
+import 'package:fintrack/features/transaction/view/add_transaction_screen.dart';
+import 'package:fintrack/features/transaction/view/history/widgets/history_item.dart';
 import 'package:fintrack/features/notification/view/notification_screen.dart';
 import 'package:fintrack/core/utils/format_rupiah.dart';
+import 'package:fintrack/core/utils/snackbar_utils.dart';
 import 'package:fintrack/core/widgets/empty_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -290,7 +293,7 @@ class _MainScreenState extends State<MainScreen> {
                       "Lihat semua",
                       style: TextStyle(
                         fontSize: 16.0,
-                        color: ColorPallete.green,
+                        color: ColorPallete.grey,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -301,58 +304,40 @@ class _MainScreenState extends State<MainScreen> {
               SizedBox(height: 16.0),
               Expanded(
                 child: transaksi.isEmpty
-                    ? EmptyState()
+                    ? const EmptyState()
                     : ListView.builder(
+                        padding: EdgeInsets.zero,
                         itemCount: transaksi.length,
                         itemBuilder: (context, index) {
                           final t = transaksi[index];
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ColorPallete.black,
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      t.category,
-                                      style: const TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: HistoryItem(
+                              transaction: t,
+                              onEdit: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AddTransactionScreen(
+                                      isEdit: true,
+                                      existing: t,
                                     ),
-                                    Text(
-                                      t.description,
-                                      style: const TextStyle(
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                Text(
-                                  "Rp ${t.amount}",
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w600,
-                                    color: t.type == "income"
-                                        ? ColorPallete.greenLight
-                                        : ColorPallete.red,
                                   ),
-                                ),
-                              ],
+                                );
+                              },
+                              onDelete: () async {
+                                final deletedTransaction = t;
+                                await provider.deleteTransaction(t.id);
+                                if (context.mounted) {
+                                  showUndoSnackBar(
+                                    context,
+                                    message: 'Transaksi berhasil dihapus',
+                                    onUndo: () {
+                                      provider.add(deletedTransaction);
+                                    },
+                                  );
+                                }
+                              },
                             ),
                           );
                         },

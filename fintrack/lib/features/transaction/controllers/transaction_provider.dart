@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/transaction_model.dart';
+import '../models/category_model.dart';
 import '../services/transaction_service.dart';
 
 class TransactionProvider with ChangeNotifier {
@@ -7,6 +8,15 @@ class TransactionProvider with ChangeNotifier {
 
   List<TransactionModel> _transactions = [];
   List<TransactionModel> get transactions => _transactions;
+
+  List<CategoryModel> _categories = [];
+  List<CategoryModel> get categories => _categories;
+
+  List<CategoryModel> get incomeCategories =>
+      _categories.where((c) => c.type == 'income').toList();
+
+  List<CategoryModel> get expenseCategories =>
+      _categories.where((c) => c.type == 'expense').toList();
 
   /// LOAD DATA DARI SUPABASE
   Future<void> loadLatest() async {
@@ -16,14 +26,18 @@ class TransactionProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadCategories() async {
+    _categories = await _service.getCategories();
+    notifyListeners();
+  }
+
   /// TAMBAH TRANSAKSI
   Future<void> add(TransactionModel trx) async {
     print("DEBUG: Provider adding transaction...");
     final success = await _service.addTransaction(
-      category: trx.category,
+      categoryId: trx.categoryId,
       description: trx.description,
       amount: trx.amount,
-      type: trx.type,
       date: trx.date,
     );
     print("DEBUG: Provider add result: $success");
@@ -43,10 +57,9 @@ class TransactionProvider with ChangeNotifier {
   Future<void> updateTransaction(TransactionModel trx) async {
     final success = await _service.updateTransaction(
       id: trx.id,
-      category: trx.category,
+      categoryId: trx.categoryId,
       description: trx.description,
       amount: trx.amount,
-      type: trx.type,
       date: trx.date,
     );
 
@@ -55,16 +68,12 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateBudgetFromTransaction(TransactionModel trx) async {
-    // TODO: Implement budget update logic
-  }
-
   double get totalIncome => _transactions
-      .where((t) => t.type == "income")
+      .where((t) => t.category?.type == "income")
       .fold(0, (s, t) => s + t.amount);
 
   double get totalExpense => _transactions
-      .where((t) => t.type == "expense")
+      .where((t) => t.category?.type == "expense")
       .fold(0, (s, t) => s + t.amount);
 
   double get totalBalance => totalIncome - totalExpense;

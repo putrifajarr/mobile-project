@@ -19,7 +19,7 @@ class HistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isExpense = transaction.type == 'expense';
+    final isExpense = transaction.category?.type == 'expense';
     final color = isExpense ? ColorPallete.red : ColorPallete.green;
     final bool hasDescription = transaction.description.isNotEmpty;
 
@@ -60,7 +60,7 @@ class HistoryItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             color: const Color.fromARGB(255, 31, 31, 31),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: ColorPallete.blackLight),
           ),
           child: Row(
@@ -72,7 +72,7 @@ class HistoryItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      transaction.category,
+                      transaction.category?.name ?? 'Umum',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

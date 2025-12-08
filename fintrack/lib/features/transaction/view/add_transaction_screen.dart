@@ -2,6 +2,7 @@ import 'package:fintrack/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:fintrack/features/transaction/models/transaction_model.dart';
+import 'package:fintrack/features/transaction/models/category_model.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -21,25 +22,63 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime selectedDate = DateTime.now();
   final amountController = TextEditingController();
   final descController = TextEditingController();
-  String selectedCategory = "Belanja";
+  CategoryModel? selectedCategory;
 
   @override
   void initState() {
     super.initState();
 
+    // Load categories first
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<TransactionProvider>(
+        context,
+        listen: false,
+      ).loadCategories();
+      _initializeFields();
+    });
+  }
+
+  void _initializeFields() {
     if (widget.isEdit && widget.existing != null) {
-      selectedType = widget.existing!.type;
-      selectedDate = widget.existing!.date;
+      final existing = widget.existing!;
+      final provider = Provider.of<TransactionProvider>(context, listen: false);
+
+      // Determine type based on category type if possible, or fallback
+      // Note: Logic assumes category object exists on existing model
+      if (existing.category != null) {
+        selectedType = existing.category!.type;
+        // Find matching category object reference from provider list to ensure equality works
+        try {
+          selectedCategory = provider.categories.firstWhere(
+            (c) => c.id == existing.categoryId,
+          );
+        } catch (_) {
+          // If not found (shouldn't happen if logical integrity exists), keep null
+        }
+      }
+
+      selectedDate = existing.date;
       amountController.text = NumberFormat.decimalPattern(
         'id_ID',
-      ).format(widget.existing!.amount.toInt());
-      descController.text = widget.existing!.description;
-      selectedCategory = widget.existing!.category;
+      ).format(existing.amount.toInt());
+      descController.text = existing.description;
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<TransactionProvider>(context);
+    // Filter categories based on selected type
+    final List<CategoryModel> visibleCategories = selectedType == 'income'
+        ? provider.incomeCategories
+        : provider.expenseCategories;
+
+    // Reset selectedCategory if it doesn't match the new type (unless it's null)
+    if (selectedCategory != null && selectedCategory!.type != selectedType) {
+      selectedCategory = null;
+    }
+
     return Scaffold(
       backgroundColor: ColorPallete.black,
       appBar: AppBar(
@@ -211,12 +250,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
+                child: DropdownButton<CategoryModel>(
                   value: selectedCategory,
                   dropdownColor: ColorPallete.blackLight,
                   icon: const Icon(
                     Icons.keyboard_arrow_down,
                     color: ColorPallete.grey,
+                  ),
+                  hint: Text(
+                    "Pilih Kategori",
+                    style: TextStyle(color: ColorPallete.grey),
                   ),
                   isExpanded: true,
                   style: const TextStyle(
@@ -224,10 +267,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
-                  items: ["Belanja", "Makanan", "Gaji", "Hiburan", "Lainnya"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  items: visibleCategories
+                      .map(
+                        (e) => DropdownMenuItem(value: e, child: Text(e.name)),
+                      )
                       .toList(),
-                  onChanged: (v) => setState(() => selectedCategory = v!),
+                  onChanged: (v) => setState(() => selectedCategory = v),
                 ),
               ),
             ),
@@ -287,7 +332,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         : ColorPallete.green;
 
     return GestureDetector(
-      onTap: () => setState(() => selectedType = value),
+      onTap: () {
+        setState(() {
+          selectedType = value;
+          selectedCategory = null; // Reset category when type changes
+        });
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -369,26 +419,42 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
 
+    if (selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Pilih kategori terlebih dahulu",
+            style: TextStyle(color: ColorPallete.white),
+          ),
+          backgroundColor: const Color(0xFFFF5145),
+        ),
+      );
+      return;
+    }
+
     final provider = Provider.of<TransactionProvider>(context, listen: false);
 
+    // Create a temporary model object.
+    // Note: userId and createdAt are placeholders as they will be handled/ignored by the service/provider for creation.
     final trx = TransactionModel(
       id: widget.isEdit ? widget.existing!.id : const Uuid().v4(),
-      type: selectedType,
-      date: selectedDate,
+      userId: '', // Placeholder
+      categoryId: selectedCategory!.id,
       amount:
           double.tryParse(
             amountController.text.replaceAll('.', '').replaceAll(',', ''),
           ) ??
           0,
       description: descController.text,
-      category: selectedCategory,
+      date: selectedDate,
+      createdAt: DateTime.now(), // Placeholder
     );
 
     if (widget.isEdit) {
       await provider.updateTransaction(trx);
     } else {
       await provider.add(trx);
-      await provider.updateBudgetFromTransaction(trx);
+      // await provider.updateBudgetFromTransaction(trx); // Removed as it wasn't implemented yet
     }
 
     if (!context.mounted) return;

@@ -3,6 +3,7 @@ import 'package:fintrack/features/transaction/controllers/transaction_provider.d
 import 'package:fintrack/features/transaction/view/add_transaction_screen.dart';
 import 'package:fintrack/features/transaction/view/history/widgets/history_item.dart';
 import 'package:fintrack/core/widgets/empty_state.dart';
+import 'package:fintrack/core/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -108,7 +109,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         );
                       },
-                      onDelete: () => provider.deleteTransaction(t.id),
+                      onDelete: () async {
+                        final deletedTransaction = t;
+                        await provider.deleteTransaction(t.id);
+                        if (context.mounted) {
+                          showUndoSnackBar(
+                            context,
+                            message: 'Transaksi berhasil dihapus',
+                            onUndo: () {
+                              provider.add(deletedTransaction);
+                            },
+                          );
+                        }
+                      },
                     );
                   },
                 );
