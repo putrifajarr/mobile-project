@@ -1,11 +1,11 @@
-import 'package:fintrack/constants/constants.dart';
-import 'package:fintrack/features/transaction/views/add_transaction_screen.dart';
-import 'package:fintrack/screens/home/views/home_screen.dart';
+import 'package:fintrack/core/constants/constants.dart';
+import 'package:fintrack/features/transaction/view/add_transaction_screen.dart';
+import 'package:fintrack/features/home/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
+import 'package:fintrack/features/auth/view/login_screen.dart';
+import 'package:fintrack/features/auth/view/register_screen.dart';
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});
