@@ -1,4 +1,5 @@
 import 'package:fintrack/features/auth/view/login_screen.dart';
+import 'package:fintrack/core/supabase_config.dart';
 import 'package:flutter/material.dart';
 
 void showLogoutDialog(BuildContext context) {
@@ -58,15 +59,18 @@ void showLogoutDialog(BuildContext context) {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                    (route) => false,
-                  );
+                onPressed: () async {
+                  await SupabaseConfig.client.auth.signOut();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                      (route) => false,
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 199, 52, 52),

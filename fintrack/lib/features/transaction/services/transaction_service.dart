@@ -9,20 +9,31 @@ class TransactionService {
     required String description,
     required double amount,
     required String type,
+    required DateTime date,
   }) async {
     final userId = supabase.auth.currentUser?.id;
-    if (userId == null) return false;
+    print("DEBUG: addTransaction - User ID: $userId"); // DEBUG LOG
+    if (userId == null) {
+      print("DEBUG: addTransaction - No user logged in!");
+      return false;
+    }
 
-    final response = await supabase.from('transactions').insert({
-      'user_id': userId,
-      'category': category,
-      'description': description,
-      'amount': amount,
-      'type': type,
-      'date': DateTime.now().toIso8601String(),
-    });
+    try {
+      final response = await supabase.from('transactions').insert({
+        'user_id': userId,
+        'category': category,
+        'description': description,
+        'amount': amount,
+        'type': type,
+        'date': date.toIso8601String(),
+      });
 
-    return response.error == null;
+      print("DEBUG: addTransaction - Response: $response");
+      return true;
+    } catch (e) {
+      print("DEBUG: addTransaction - Error: $e");
+      return false;
+    }
   }
 
   Future<List<Map<String, dynamic>>> getLatestTransactions() async {

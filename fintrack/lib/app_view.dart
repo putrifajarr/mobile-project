@@ -7,6 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fintrack/features/auth/view/login_screen.dart';
 import 'package:fintrack/features/auth/view/register_screen.dart';
 
+import 'package:fintrack/core/supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});
 
@@ -42,7 +45,23 @@ class MyAppView extends StatelessWidget {
         '/add': (context) => const AddTransactionScreen(),
       },
 
-      home: const LoginScreen(),
+      home: StreamBuilder<AuthState>(
+        stream: SupabaseConfig.client.auth.onAuthStateChange,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final session = snapshot.data?.session;
+          if (session != null) {
+            return const HomeScreen();
+          } else {
+            return const LoginScreen();
+          }
+        },
+      ),
     );
   }
 }

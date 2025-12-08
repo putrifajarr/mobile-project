@@ -18,12 +18,15 @@ class TransactionProvider with ChangeNotifier {
 
   /// TAMBAH TRANSAKSI
   Future<void> add(TransactionModel trx) async {
+    print("DEBUG: Provider adding transaction...");
     final success = await _service.addTransaction(
       category: trx.category,
       description: trx.description,
       amount: trx.amount,
       type: trx.type,
+      date: trx.date,
     );
+    print("DEBUG: Provider add result: $success");
 
     if (success) {
       await loadLatest();

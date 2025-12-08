@@ -169,7 +169,7 @@ Future<void> _pickImage(BuildContext context, ImageSource source) async {
               fontWeight: FontWeight.w500,
             ),
           ),
-          backgroundColor: Color.fromARGB(255, 164, 252, 116),
+          backgroundColor: Color(0xFFA4FC74),
           behavior: SnackBarBehavior.floating,
         ),
       );

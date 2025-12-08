@@ -27,7 +27,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void initState() {
     super.initState();
 
-    // Jika mode EDIT → preload data
     if (widget.isEdit && widget.existing != null) {
       selectedType = widget.existing!.type;
       selectedDate = widget.existing!.date;
@@ -183,7 +182,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   'id_ID',
                 ).format(number);
 
-                // Update only if different to avoid cursor jumping loops
                 if (v != formatted) {
                   amountController.value = TextEditingValue(
                     text: formatted,
@@ -357,7 +355,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  void _save(BuildContext context) {
+  void _save(BuildContext context) async {
     if (amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -387,12 +385,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
 
     if (widget.isEdit) {
-      provider.updateTransaction(trx);
+      await provider.updateTransaction(trx);
     } else {
-      provider.add(trx);
-      provider.updateBudgetFromTransaction(trx);
+      await provider.add(trx);
+      await provider.updateBudgetFromTransaction(trx);
     }
 
+    if (!context.mounted) return;
     Navigator.pop(context);
   }
 }

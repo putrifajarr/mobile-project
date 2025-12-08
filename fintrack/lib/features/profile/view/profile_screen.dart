@@ -60,13 +60,17 @@ class ProfileScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  "Putribaikhati@gmail.com",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w400,
-                  ),
+                Consumer<UserProvider>(
+                  builder: (context, userProvider, child) {
+                    return Text(
+                      userProvider.email,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
