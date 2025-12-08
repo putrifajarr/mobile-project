@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         throw const AuthException("Pendaftaran gagal");
       }
 
-      // CEK EMAIL SUDAH ADA (User Recommendation)
+      // User sdh daftar
       final identities = response.user!.identities;
       if (identities == null || identities.isEmpty) {
         throw const AuthException("Email sudah terdaftar, silakan login");
@@ -88,7 +88,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           print("DEBUG: Insert into users table success");
         } catch (e) {
           print("DEBUG: Insert into users table failed: $e");
-          // Continue anyway as auth succeeded
         }
 
         print("DEBUG: Registration success. Navigating to login.");
@@ -114,7 +113,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String message = e.message;
       bool isDuplicate = false;
 
-      // Check for both my custom error and Supabase's original error
       if (e.message.contains("User already registered") ||
           e.message.contains("already registered") ||
           e.message.contains("sudah terdaftar")) {
@@ -174,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 12),
 
-                // TITLE
+                // title
                 Text(
                   "Daftar Akun",
                   style: GoogleFonts.ubuntu(
@@ -193,7 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // CARD
+                // form
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -222,7 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 28),
 
-                      // BUTTON
+                      // button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

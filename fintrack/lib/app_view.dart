@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fintrack/features/auth/view/login_screen.dart';
 import 'package:fintrack/features/auth/view/register_screen.dart';
+import 'package:fintrack/features/splash/view/splash_screen.dart';
 
 import 'package:fintrack/core/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -49,16 +50,14 @@ class MyAppView extends StatelessWidget {
         stream: SupabaseConfig.client.auth.onAuthStateChange,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            return const SplashScreen();
           }
 
           final session = snapshot.data?.session;
           if (session != null) {
             return const HomeScreen();
           } else {
-            return const LoginScreen();
+            return const SplashScreen();
           }
         },
       ),

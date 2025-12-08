@@ -127,30 +127,51 @@ void showEditUsernameDialog(BuildContext context) {
                               if (formKey.currentState!.validate()) {
                                 setState(() => isLoading = true);
 
-                                // Simulate API call
-                                await Future.delayed(
-                                  const Duration(seconds: 1),
-                                );
-
                                 if (context.mounted) {
-                                  Provider.of<UserProvider>(
-                                    context,
-                                    listen: false,
-                                  ).updateUsername(usernameController.text);
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Username berhasil diperbarui!",
-                                        style: TextStyle(
-                                          color: ColorPallete.black,
-                                          fontWeight: FontWeight.w500,
+                                  try {
+                                    await Provider.of<UserProvider>(
+                                      context,
+                                      listen: false,
+                                    ).updateUsername(usernameController.text);
+
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Username berhasil diperbarui!",
+                                            style: TextStyle(
+                                              color: ColorPallete.black,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          backgroundColor: Color.fromARGB(
+                                            255,
+                                            164,
+                                            252,
+                                            116,
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
                                         ),
-                                      ),
-                                      backgroundColor: Color.fromARGB(255, 164, 252, 116),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Gagal memperbarui username",
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      setState(() => isLoading = false);
+                                    }
+                                  }
                                 }
                               }
                             }

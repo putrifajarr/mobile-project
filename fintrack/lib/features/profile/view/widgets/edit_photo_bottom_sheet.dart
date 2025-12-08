@@ -163,7 +163,7 @@ Future<void> _pickImage(BuildContext context, ImageSource source) async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Username berhasil diperbarui!",
+            "Foto profil berhasil diperbarui!",
             style: TextStyle(
               color: ColorPallete.black,
               fontWeight: FontWeight.w500,

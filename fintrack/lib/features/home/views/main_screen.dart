@@ -65,9 +65,28 @@ class _MainScreenState extends State<MainScreen> {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 20.0,
-                        backgroundImage: AssetImage('assets/profile.jpeg'),
+                      Consumer<UserProvider>(
+                        builder: (context, userProvider, child) {
+                          ImageProvider backgroundImage;
+                          if (userProvider.profilePhoto != null) {
+                            backgroundImage = FileImage(
+                              userProvider.profilePhoto!,
+                            );
+                          } else if (userProvider.profilePhotoUrl != null &&
+                              userProvider.profilePhotoUrl!.isNotEmpty) {
+                            backgroundImage = NetworkImage(
+                              userProvider.profilePhotoUrl!,
+                            );
+                          } else {
+                            backgroundImage = const AssetImage(
+                              'assets/profile.jpeg',
+                            );
+                          }
+                          return CircleAvatar(
+                            radius: 20.0,
+                            backgroundImage: backgroundImage,
+                          );
+                        },
                       ),
                       SizedBox(width: 12.0),
                       Column(

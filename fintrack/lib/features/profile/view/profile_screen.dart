@@ -21,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Text(
-                  "Profil Saya",
+                  "Profil",
                   style: TextStyle(
                     color: ColorPallete.white,
                     fontSize: 26.0,
@@ -37,12 +37,21 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Consumer<UserProvider>(
                   builder: (context, userProvider, child) {
+                    ImageProvider backgroundImage;
+                    if (userProvider.profilePhoto != null) {
+                      backgroundImage = FileImage(userProvider.profilePhoto!);
+                    } else if (userProvider.profilePhotoUrl != null &&
+                        userProvider.profilePhotoUrl!.isNotEmpty) {
+                      backgroundImage = NetworkImage(
+                        userProvider.profilePhotoUrl!,
+                      );
+                    } else {
+                      backgroundImage = const AssetImage('assets/profile.jpeg');
+                    }
+
                     return CircleAvatar(
                       radius: 50.0,
-                      backgroundImage: userProvider.profilePhoto != null
-                          ? FileImage(userProvider.profilePhoto!)
-                          : const AssetImage('assets/profile.jpeg')
-                                as ImageProvider,
+                      backgroundImage: backgroundImage,
                     );
                   },
                 ),
