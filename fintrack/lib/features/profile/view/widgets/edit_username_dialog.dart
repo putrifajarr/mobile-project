@@ -147,12 +147,7 @@ void showEditUsernameDialog(BuildContext context) {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      backgroundColor: Color.fromARGB(
-                                        255,
-                                        164,
-                                        252,
-                                        116,
-                                      ),
+                                      backgroundColor: Color.fromARGB(255, 164, 252, 116),
                                       behavior: SnackBarBehavior.floating,
                                     ),
                                   );

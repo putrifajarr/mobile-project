@@ -162,8 +162,15 @@ Future<void> _pickImage(BuildContext context, ImageSource source) async {
       ).updateProfilePhoto(File(image.path));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Foto berhasil dipilih"),
-          backgroundColor: ColorPallete.green,
+          content: Text(
+            "Username berhasil diperbarui!",
+            style: TextStyle(
+              color: ColorPallete.black,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Color.fromARGB(255, 164, 252, 116),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
