@@ -1,6 +1,7 @@
 import 'package:fintrack/core/constants/constants.dart';
 import 'package:fintrack/features/transaction/models/transaction_model.dart';
 import 'package:fintrack/features/transaction/services/transaction_service.dart';
+
 import 'package:fintrack/features/transaction/view/history/history_screen.dart';
 import 'package:fintrack/features/statistic/widgets/bar_chart.dart';
 import 'package:fintrack/features/statistic/controllers/date_filter_controller.dart';
@@ -35,6 +36,7 @@ class _StatScreenState extends State<StatScreen> {
   @override
   void dispose() {
     _controller.removeListener(_fetchData);
+
     _controller.dispose();
     super.dispose();
   }
@@ -207,6 +209,7 @@ class _StatScreenState extends State<StatScreen> {
             SliverToBoxAdapter(
               child: Container(
                 color: ColorPallete.black,
+
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ListenableBuilder(
                   listenable: _controller,

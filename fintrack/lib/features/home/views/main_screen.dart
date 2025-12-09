@@ -304,7 +304,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 SizedBox(height: 16.0),
                 transaksi.isEmpty
-                    ? const EmptyState()
+                    ? const SizedBox(height: 300, child: EmptyState())
                     : ListView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,

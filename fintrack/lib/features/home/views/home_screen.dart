@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         clipBehavior: Clip.antiAlias,
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(color: Color.fromARGB(255, 44, 44, 44), width: 0.8),
+            top: BorderSide(color: Color.fromARGB(255, 67, 67, 67), width: 0.8),
           ),
         ),
         child: BottomAppBar(

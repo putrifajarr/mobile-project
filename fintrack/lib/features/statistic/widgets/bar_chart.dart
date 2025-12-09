@@ -1,5 +1,6 @@
 import 'package:fintrack/core/constants/constants.dart';
 import 'package:fintrack/features/statistic/controllers/date_filter_controller.dart';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -35,12 +36,14 @@ class MyChart extends StatelessWidget {
       BarChartData(
         maxY: maxY,
         minY: 0,
+
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => ColorPallete.blackLight,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
                 formatCompactNumber(rod.toY),
+
                 const TextStyle(
                   color: ColorPallete.white,
                   fontWeight: FontWeight.bold,
@@ -68,6 +71,7 @@ class MyChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 32,
+
               getTitlesWidget: leftTitles,
               interval: interval,
             ),
@@ -78,6 +82,7 @@ class MyChart extends StatelessWidget {
           show: true,
           drawVerticalLine: false,
           horizontalInterval: interval,
+
           getDrawingHorizontalLine: (value) {
             return const FlLine(color: Colors.white10, strokeWidth: 1);
           },

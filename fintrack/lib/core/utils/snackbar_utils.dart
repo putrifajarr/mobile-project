@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fintrack/core/constants/constants.dart';
 
 void showUndoSnackBar(
   BuildContext context, {
@@ -8,8 +7,9 @@ void showUndoSnackBar(
 }) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      backgroundColor: ColorPallete.blackLight,
+      backgroundColor: const Color.fromARGB(255, 55, 55, 55),
       content: Text(message, style: const TextStyle(color: Colors.white)),
+      behavior: SnackBarBehavior.floating,
       action: SnackBarAction(
         label: 'Batal',
         textColor: const Color.fromARGB(255, 255, 107, 107),
