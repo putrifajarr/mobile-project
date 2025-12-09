@@ -14,6 +14,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
+  
+  // 1. Tambahkan state untuk visibilitas password
+  bool _isPasswordVisible = false; 
 
   Future<void> _login() async {
     if (isLoading) return;
@@ -127,6 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: emailController,
                         label: "Email",
                         icon: Icons.email_outlined,
+                        // Email tidak memerlukan toggle password
                       ),
                       const SizedBox(height: 18),
 
@@ -134,7 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: passwordController,
                         label: "Password",
                         icon: Icons.lock_outline,
-                        obscure: true,
+                        obscure: !_isPasswordVisible, // Kontrol visibilitas
+                        isPassword: true, // Flag untuk mengaktifkan toggle
                       ),
                       const SizedBox(height: 28),
 
@@ -204,6 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
     required String label,
     required IconData icon,
     bool obscure = false,
+    bool isPassword = false, // Parameter baru untuk toggle
   }) {
     return TextField(
       controller: controller,
@@ -215,6 +221,24 @@ class _LoginScreenState extends State<LoginScreen> {
         prefixIcon: Icon(icon, color: Colors.white70),
         filled: true,
         fillColor: Colors.white.withOpacity(0.09),
+        // 2. Tambahkan suffixIcon hanya jika ini adalah input password
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  // Ubah ikon berdasarkan state
+                  _isPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                  color: Colors.white70,
+                ),
+                onPressed: () {
+                  // 3. Ubah state saat tombol diklik
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              )
+            : null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),

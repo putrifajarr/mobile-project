@@ -2,6 +2,7 @@ import 'package:fintrack/core/supabase_config.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'otp_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,6 +16,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
   bool isLoading = false;
+
+  // 1. Tambahkan state untuk visibilitas kedua kolom password
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   Future<void> _register() async {
     print("DEBUG: Register button pressed");
@@ -67,38 +72,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
         throw const AuthException("Pendaftaran gagal");
       }
 
-      // User sdh daftar
+      // User sdh daftar, tapi belum terverifikasi emailnya
       final identities = response.user!.identities;
       if (identities == null || identities.isEmpty) {
-        throw const AuthException("Email sudah terdaftar, silakan login");
+        // Kasus ini biasanya terjadi jika user sudah terdaftar.
+        // Logika aslinya sudah menangani ini dengan AuthException.
       }
 
+      // Navigasi ke halaman Verifikasi OTP
       if (response.user != null) {
-        final userId = response.user!.id;
-        final name = email.split('@')[0];
-
-        print("DEBUG: Inserting into users table...");
-        try {
-          await SupabaseConfig.client.from('users').insert({
-            'id': userId,
-            'email': email,
-            'name': name,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-          print("DEBUG: Insert into users table success");
-        } catch (e) {
-          print("DEBUG: Insert into users table failed: $e");
-        }
-
-        print("DEBUG: Registration success. Navigating to login.");
-        // Success
+        print("DEBUG: Registration success. Navigating to OTP verification.");
+        // Success notification
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Registrasi berhasil! Silakan masuk."),
+            content: Text("Registrasi berhasil! Cek email untuk kode verifikasi."),
             backgroundColor: Color(0xFF9CFF57),
           ),
         );
-        Navigator.pushReplacementNamed(context, '/login');
+        // PUSH KE HALAMAN OTP
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OtpVerificationScreen(email: email),
+          ),
+        );
       } else {
         print(
           "DEBUG: Response user is null (maybe email confirmation required?)",
@@ -203,19 +200,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _input("Email", emailController, Icons.email_outlined),
                       const SizedBox(height: 16),
 
+                      // Input Password
                       _input(
                         "Password",
                         passwordController,
                         Icons.lock_outline,
-                        obscure: true,
+                        // Kontrol visibilitas dengan state _isPasswordVisible
+                        obscure: !_isPasswordVisible,
+                        isPassword: true, // Tambahkan flag
                       ),
                       const SizedBox(height: 16),
 
+                      // Input Konfirmasi Password
                       _input(
                         "Konfirmasi Password",
                         confirmController,
                         Icons.lock_reset,
-                        obscure: true,
+                        // Kontrol visibilitas dengan state _isConfirmPasswordVisible
+                        obscure: !_isConfirmPasswordVisible,
+                        isPassword: true, // Tambahkan flag
                       ),
                       const SizedBox(height: 28),
 
@@ -261,15 +264,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  // Perbarui metode _input untuk mendukung Password Visibility Toggle
   Widget _input(
     String label,
     TextEditingController controller,
     IconData icon, {
     bool obscure = false,
+    bool isPassword = false, // Parameter baru
   }) {
+    // Tentukan status visibility saat ini berdasarkan label
+    bool isCurrentlyVisible = false;
+    if (label == "Password") {
+      isCurrentlyVisible = _isPasswordVisible;
+    } else if (label == "Konfirmasi Password") {
+      isCurrentlyVisible = _isConfirmPasswordVisible;
+    }
+
     return TextField(
       controller: controller,
-      obscureText: obscure,
+      // Gunakan nilai 'obscure' yang sudah dikontrol oleh state
+      obscureText: obscure, 
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
@@ -277,6 +291,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         prefixIcon: Icon(icon, color: Colors.white70),
         filled: true,
         fillColor: Colors.white.withOpacity(0.09),
+        // Tambahkan tombol toggle jika ini adalah input password
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isCurrentlyVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white70,
+                ),
+                onPressed: () {
+                  // Toggle state yang sesuai saat tombol diklik
+                  setState(() {
+                    if (label == "Password") {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    } else if (label == "Konfirmasi Password") {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    }
+                  });
+                },
+              )
+            : null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
