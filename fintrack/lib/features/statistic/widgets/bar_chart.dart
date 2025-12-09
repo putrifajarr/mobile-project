@@ -1,27 +1,46 @@
 import 'package:fintrack/core/constants/constants.dart';
+import 'package:fintrack/features/statistic/controllers/date_filter_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class MyChart extends StatelessWidget {
-  final bool isWeekly; // To decide labels
+  final StatPeriod period;
+  final List<double> incomeData;
+  final List<double> expenseData;
 
-  const MyChart({super.key, this.isWeekly = true});
+  const MyChart({
+    super.key,
+    required this.period,
+    required this.incomeData,
+    required this.expenseData,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Mock data generation based on view
-    final List<double> incomeData = [5, 12, 18, 10, 15, 9, 2];
-    final List<double> expenseData = [3, 10, 5, 16, 6, 1.5, 9];
+    double maxIncome = 0;
+    for (var val in incomeData) {
+      if (val > maxIncome) maxIncome = val;
+    }
+    double maxExpense = 0;
+    for (var val in expenseData) {
+      if (val > maxExpense) maxExpense = val;
+    }
+    double maxVal = maxIncome > maxExpense ? maxIncome : maxExpense;
+    if (maxVal == 0) maxVal = 100;
+
+    final double maxY = maxVal * 1.2;
+    final double interval = maxY / 5;
 
     return BarChart(
       BarChartData(
-        maxY: 20,
+        maxY: maxY,
+        minY: 0,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => ColorPallete.blackLight,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
-                rod.toY.toString(),
+                formatCompactNumber(rod.toY),
                 const TextStyle(
                   color: ColorPallete.white,
                   fontWeight: FontWeight.bold,
@@ -48,8 +67,9 @@ class MyChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 28,
+              reservedSize: 32,
               getTitlesWidget: leftTitles,
+              interval: interval,
             ),
           ),
         ),
@@ -57,12 +77,12 @@ class MyChart extends StatelessWidget {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: 5,
+          horizontalInterval: interval,
           getDrawingHorizontalLine: (value) {
             return const FlLine(color: Colors.white10, strokeWidth: 1);
           },
         ),
-        barGroups: List.generate(7, (index) {
+        barGroups: List.generate(incomeData.length, (index) {
           return makeGroupData(index, incomeData[index], expenseData[index]);
         }),
       ),
@@ -73,34 +93,64 @@ class MyChart extends StatelessWidget {
     const style = TextStyle(
       color: ColorPallete.grey,
       fontWeight: FontWeight.bold,
-      fontSize: 12,
+      fontSize: 10,
     );
-    String text;
-    if (value == 0) {
-      text = '0';
-    } else if (value == 10) {
-      text = '10K';
-    } else if (value == 20) {
-      text = '20K';
-    } else {
-      return Container();
-    }
+
+    if (value == 0) return Container();
+
     return SideTitleWidget(
       meta: meta,
       space: 0,
-      child: Text(text, style: style),
+      child: Text(formatCompactNumber(value), style: style),
     );
   }
 
+  String formatCompactNumber(double value) {
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(0)}K';
+    }
+    return value.toStringAsFixed(0);
+  }
+
   Widget bottomTitles(double value, TitleMeta meta) {
-    final titles = <String>['Sn', 'Sl', 'Rb', 'Km', 'Jm', 'Sb', 'Mg'];
+    final titlesWeekly = <String>['Sn', 'Sl', 'Rb', 'Km', 'Jm', 'Sb', 'Mg'];
+    final titlesMonthly = <String>['W1', 'W2', 'W3', 'W4', 'W5'];
+    final titlesYearly = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+
+    List<String> titles;
+    switch (period) {
+      case StatPeriod.weekly:
+        titles = titlesWeekly;
+        break;
+      case StatPeriod.monthly:
+        titles = titlesMonthly;
+        break;
+      case StatPeriod.yearly:
+        titles = titlesYearly;
+        break;
+    }
 
     final Widget text = Text(
       value.toInt() < titles.length ? titles[value.toInt()] : '',
       style: const TextStyle(
         color: ColorPallete.grey,
         fontWeight: FontWeight.bold,
-        fontSize: 12,
+        fontSize: 10,
       ),
     );
 

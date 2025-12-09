@@ -95,7 +95,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   itemCount: transactions.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final t = transactions[index];
                     return HistoryItem(

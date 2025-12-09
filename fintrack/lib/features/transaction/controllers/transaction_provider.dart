@@ -22,7 +22,13 @@ class TransactionProvider with ChangeNotifier {
   Future<void> loadLatest() async {
     final data = await _service.getLatestTransactions();
     _transactions = data.map((e) => TransactionModel.fromJson(e)).toList();
-    _transactions.sort((a, b) => b.date.compareTo(a.date));
+    _transactions.sort((a, b) {
+      final dateComparison = b.date.compareTo(a.date);
+      if (dateComparison != 0) {
+        return dateComparison;
+      }
+      return b.createdAt.compareTo(a.createdAt);
+    });
     notifyListeners();
   }
 

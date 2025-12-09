@@ -14,7 +14,7 @@ class StatFilterSection extends StatelessWidget {
       children: [
         // Period Selector
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
             color: ColorPallete.blackLight,
             borderRadius: BorderRadius.circular(24),
