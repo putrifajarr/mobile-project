@@ -253,6 +253,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                         ),
                       ),
+                      
+                      // --- TAMBAHAN LINK LOGIN ---
+                      const SizedBox(height: 14),
+
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/login'),
+                        child: Text(
+                          "Sudah punya akun? Masuk",
+                          style: GoogleFonts.ubuntu(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      // --- END TAMBAHAN ---
                     ],
                   ),
                 ),
@@ -283,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return TextField(
       controller: controller,
       // Gunakan nilai 'obscure' yang sudah dikontrol oleh state
-      obscureText: obscure, 
+      obscureText: obscure,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
