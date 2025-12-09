@@ -1,7 +1,9 @@
 import 'package:fintrack/core/constants/constants.dart';
 import 'package:fintrack/features/budget/controllers/budget_provider.dart';
 import 'package:fintrack/features/budget/model/budget_model.dart';
+import 'package:fintrack/core/utils/snackbar_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'add_budget.dart';
@@ -34,6 +36,27 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
     if (percent <= 75) return Colors.orange;
     return Colors.red;
   }
+  
+  // <--- TAMBAHAN LOGIKA DEDUKSI PERULANGAN --->
+  String _getRepeatLabel(DateTime start, DateTime end) {
+    final diffDays = end.difference(start).inDays;
+    
+    if (diffDays == 0) {
+      return 'Harian';
+    } 
+    if (diffDays == 6) { 
+      return 'Mingguan';
+    } 
+    
+    // Perkiraan Bulanan: Berakhir satu hari sebelum tanggal yang sama di bulan berikutnya.
+    final expectedMonthlyEnd = DateTime(start.year, start.month + 1, start.day).subtract(const Duration(days: 1));
+    if (end.year == expectedMonthlyEnd.year && end.month == expectedMonthlyEnd.month && end.day == expectedMonthlyEnd.day) {
+       return 'Bulanan';
+    }
+
+    return 'Perulangan'; // Default fallback
+  }
+  // <--- END TAMBAHAN LOGIKA DEDUKSI PERULANGAN --->
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +78,7 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
                 ),
                 SizedBox(
                   child: ElevatedButton(
+                    
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: ColorPallete.black,
@@ -69,7 +93,10 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
                         MaterialPageRoute(
                           builder: (_) => const AddBudgetPage(),
                         ),
-                      );
+                      ).then((_) {
+                         context.read<BudgetProvider>().loadBudgets();
+                         setState(() {});
+                      });
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -127,6 +154,8 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
   }
 
   Widget _listView(List<BudgetModel> budgets) {
+    final provider = context.read<BudgetProvider>();
+
     return ListView.separated(
       itemCount: budgets.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
@@ -137,118 +166,162 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
         final percent = total <= 0 ? 0.0 : ((used / total) * 100);
         final progress = (percent / 100).clamp(0.0, 1.0);
         final progressColor = _progressColor(percent);
+        
+        final repeatLabel = _getRepeatLabel(b.tanggalMulai, b.tanggalAkhir); // <--- TAMBAHAN
 
-        return Container(
-          decoration: BoxDecoration(
-            color: ColorPallete.blackLight,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return Slidable(
+          key: ValueKey(b.id),
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            extentRatio: 0.25,
             children: [
-              // Title row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    b.nama,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    currency.format((total - used).clamp(0, double.infinity)),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              SlidableAction(
+                onPressed: (context) async {
+                  final deletedBudget = b;
+                  await provider.deleteBudget(b.id);
+                  if (context.mounted) {
+                    showUndoSnackBar(
+                      context,
+                      message: 'Anggaran ${b.nama} berhasil dihapus',
+                      onUndo: () {
+                        provider.addBudget(deletedBudget); 
+                      },
+                    );
+                  }
+                },
+                backgroundColor: ColorPallete.red,
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: 'Hapus',
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 4),
-              // Subtitle row (category & total)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    b.kategori,
-                    style: const TextStyle(
-                      color: ColorPallete.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    'Total: ${currency.format(total)}',
-                    style: const TextStyle(
-                      color: ColorPallete.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => AddBudgetPage(existingBudget: b),
+                ),
+              ).then((_) {
+                 context.read<BudgetProvider>().loadBudgets();
+                 setState(() {});
+              });
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: ColorPallete.blackLight,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 16),
-              // Progress bar with percentage label inside
-              Stack(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1F1F1F),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.maxWidth * progress;
-                      return Container(
-                        width: width,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: progressColor,
-                          borderRadius: BorderRadius.circular(12),
+                  // Title row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        b.nama,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    },
-                  ),
-                  Positioned.fill(
-                    child: Center(
-                      child: Text(
-                        '${percent.toStringAsFixed(0)}%',
+                      ),
+                      Text(
+                        currency.format((total - used).clamp(0, double.infinity)),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Subtitle row (category & total)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${b.kategori} ($repeatLabel)', // <--- MODIFIKASI: Tampilkan label perulangan
+                        style: const TextStyle(
+                          color: ColorPallete.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Total: ${currency.format(total)}',
+                        style: const TextStyle(
+                          color: ColorPallete.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Progress bar with percentage label inside
+                  Stack(
+                    children: [
+                      Container(
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1F1F1F),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final width = constraints.maxWidth * progress;
+                          return Container(
+                            width: width,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: progressColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          );
+                        },
+                      ),
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            '${percent.toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Dates
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Mulai: ${DateFormat('dd MMM yyyy', 'id_ID').format(b.tanggalMulai)}',
+                        style: const TextStyle(
+                          color: ColorPallete.grey,
                           fontSize: 12,
                         ),
                       ),
-                    ),
+                      Text(
+                        'Akhir: ${DateFormat('dd MMM yyyy', 'id_ID').format(b.tanggalAkhir)}',
+                        style: const TextStyle(
+                          color: ColorPallete.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              // Dates
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Mulai: ${DateFormat('dd MMM yyyy', 'id_ID').format(b.tanggalMulai)}',
-                    style: const TextStyle(
-                      color: ColorPallete.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Text(
-                    'Akhir: ${DateFormat('dd MMM yyyy', 'id_ID').format(b.tanggalAkhir)}',
-                    style: const TextStyle(
-                      color: ColorPallete.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         );
       },

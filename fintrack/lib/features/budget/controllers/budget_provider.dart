@@ -20,6 +20,15 @@ class BudgetProvider with ChangeNotifier {
     }
   }
 
+  // <--- TAMBAHAN: UPDATE LOGIC DI PROVIDER --->
+  Future<void> updateBudget(BudgetModel budget) async {
+    final success = await _service.updateBudget(budget);
+    if (success) {
+      await loadBudgets();
+    }
+  }
+  // <--- END TAMBAHAN --->
+
   Future<void> deleteBudget(String id) async {
     final success = await _service.deleteBudget(id);
     if (success) {
