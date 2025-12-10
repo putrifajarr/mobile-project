@@ -251,13 +251,6 @@ class _AnggaranScreenState extends State<AnggaranScreen> {
                           fontSize: 14,
                         ),
                       ),
-                      Text(
-                        'Total: ${currency.format(total)}',
-                        style: const TextStyle(
-                          color: ColorPallete.grey,
-                          fontSize: 14,
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

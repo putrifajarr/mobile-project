@@ -2,9 +2,39 @@ import 'package:fintrack/core/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
+import 'dart:convert'; // Wajib untuk encode payload JSON
 
 class TransactionService {
   SupabaseClient get supabase => SupabaseConfig.client;
+
+  // Kunci Service Role Anda (wajib untuk memanggil Edge Function)
+  static const _serviceRoleKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZ3BsbHJscmRvd2h6bHNtZWx5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDU5MzMxNCwiZXhwIjoyMDgwMTY5MzE0fQ.ShnlHUeQHP35h8yA5SoFOjxH1KLNfze13iBwbl5kgD8';
+  
+  // <--- FUNGSI NOTIFIKASI BARU: Dipanggil ASYNC setelah INSERT berhasil --->
+  Future<void> _notifyRealtime(Map<String, dynamic> newRecord) async {
+    final payload = jsonEncode({
+      'table': 'transactions',
+      'type': 'INSERT',
+      'record': newRecord,
+      'user_id': newRecord['user_id'],
+    });
+
+    try {
+      // Memanggil Edge Function melalui Supabase Client (Cara Paling Andal)
+      await supabase.functions.invoke('realtime-notify',
+        body: payload,
+        headers: {
+          'Authorization': 'Bearer $_serviceRoleKey',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("DEBUG: Edge Function realtime-notify dipanggil dari client.");
+    } catch (e) {
+      print("DEBUG: Gagal memanggil Edge Function dari client: $e");
+    }
+  }
+
 
   Future<bool> addTransaction({
     required int categoryId,
@@ -18,23 +48,35 @@ class TransactionService {
       return false;
     }
 
-    try {
-      final response = await supabase.from('transactions').insert({
-        'user_id': userId,
-        'category_id': categoryId,
-        'description': description,
-        'amount': amount,
-        'date': date.toIso8601String(),
-      }).select();
+    final dataToInsert = {
+      'user_id': userId,
+      'category_id': categoryId,
+      'description': description,
+      'amount': amount,
+      'date': date.toIso8601String(),
+      'created_at': DateTime.now().toIso8601String(), // Wajib untuk sorting UI
+    };
 
+    try {
+      // 1. INSERT TRANSAKSI ke database (Wajib menggunakan .select() untuk konfirmasi)
+      final response = await supabase.from('transactions').insert(dataToInsert).select();
+      
+      final isSuccess = response is List && response.isNotEmpty;
+      
+      if (isSuccess) {
+        // 2. JIKA BERHASIL, PANGGIL EDGE FUNCTION (async, tidak memblokir insert)
+        _notifyRealtime(response.first as Map<String, dynamic>);
+      }
+      
       print("DEBUG: addTransaction - Response: $response");
-      return response is List && response.isNotEmpty;
+      return isSuccess; 
     } catch (e) {
       print("DEBUG: addTransaction - Error: $e");
       return false;
     }
   }
 
+  // --- FUNGSI LAIN ---
   Future<List<Map<String, dynamic>>> getLatestTransactions() async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return [];
@@ -46,10 +88,10 @@ class TransactionService {
           .eq('user_id', userId)
           .order('date', ascending: false)
           .order('created_at', ascending: false)
-          .limit(50); // Increased limit for better visibility
+          .limit(50); 
 
-      // print("FETCH RESULT → $result");
-      return List<Map<String, dynamic>>.from(result as List);
+      // Memperbaiki warnings 'unnecessary_cast' dan 'unnecessary_type_check'
+      return List<Map<String, dynamic>>.from(result); 
     } catch (e) {
       print("DEBUG: getLatestTransactions - Error: $e");
       return [];
@@ -101,8 +143,9 @@ class TransactionService {
         .lte('date', end.toIso8601String())
         .order('date', ascending: true);
 
-    final data = response as List<dynamic>;
-    return data.map((e) => TransactionModel.fromJson(e)).toList();
+    // Memperbaiki warning 'unnecessary_cast'
+    final data = response; 
+    return (data as List<dynamic>).map((e) => TransactionModel.fromJson(e)).toList();
   }
 
   Future<List<CategoryModel>> getCategories() async {
