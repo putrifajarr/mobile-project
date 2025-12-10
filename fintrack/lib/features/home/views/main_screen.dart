@@ -13,6 +13,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:fintrack/core/messaging_service.dart'; 
+// Tambahan untuk memperbaiki error: import yang tidak lengkap/kosong
+// import 'package:fintrack/'; <--- BARIS INI DIHAPUS
+
+// --- TAMBAHAN WAJIB (Mengatasi Anggaran tidak berubah) ---
+import 'package:fintrack/features/budget/controllers/budget_provider.dart'; 
+// --- END TAMBAHAN ---
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -22,14 +30,26 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  
   @override
   void initState() {
     super.initState();
 
     Future.microtask(() {
+      // 1. Memuat Transaksi (Memicu refresh Transaksi Terbaru)
       context.read<TransactionProvider>().loadLatest();
-      // Load User Data (Profile)
+      
+      // 2. Memuat Data Pengguna
       context.read<UserProvider>().loadUserData();
+
+      // 3. Memuat Anggaran (Memastikan persentase Anggaran berubah)
+      // Asumsi fungsi di BudgetProvider Anda adalah 'loadBudgets'
+      context.read<BudgetProvider>().loadBudgets(); 
+
+      // 4. FASE A & B: PANGGIL SERVICE NOTIFIKASI
+      final messagingService = MessagingService();
+      messagingService.saveFCMToken(); 
+      messagingService.setupInteractions(context);
     });
   }
 
@@ -48,14 +68,14 @@ class _MainScreenState extends State<MainScreen> {
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
             colors: [
-              Color.fromRGBO(52, 89, 9, 1),
-              Color.fromRGBO(30, 50, 9, 0.6),
-              Color.fromRGBO(18, 29, 6, 0.4),
-              Color.fromRGBO(18, 29, 6, 0.2),
-              Color.fromRGBO(10, 16, 3, 0.2),
-              Color.fromRGBO(10, 16, 3, 0.0),
+              const Color.fromRGBO(52, 89, 9, 1),
+              const Color.fromRGBO(30, 50, 9, 0.6),
+              const Color.fromRGBO(18, 29, 6, 0.4),
+              const Color.fromRGBO(18, 29, 6, 0.2),
+              const Color.fromRGBO(10, 16, 3, 0.2),
+              const Color.fromRGBO(10, 16, 3, 0.0),
             ],
-            transform: GradientRotation(6 * (math.pi / 180)),
+            transform: GradientRotation(6 * (math.pi / 180)), 
           ),
         ),
         child: Padding(
@@ -73,9 +93,7 @@ class _MainScreenState extends State<MainScreen> {
                           builder: (context, userProvider, child) {
                             ImageProvider backgroundImage;
                             if (userProvider.profilePhoto != null) {
-                              backgroundImage = FileImage(
-                                userProvider.profilePhoto!,
-                              );
+                              backgroundImage = FileImage(userProvider.profilePhoto!);
                             } else if (userProvider.profilePhotoUrl != null &&
                                 userProvider.profilePhotoUrl!.isNotEmpty) {
                               backgroundImage = NetworkImage(
@@ -92,19 +110,19 @@ class _MainScreenState extends State<MainScreen> {
                             );
                           },
                         ),
-                        SizedBox(width: 12.0),
+                        const SizedBox(width: 12.0),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               context.watch<UserProvider>().username,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: ColorPallete.white,
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            Text(
+                            const Text(
                               "Otw kaya",
                               style: TextStyle(
                                 color: ColorPallete.white,
@@ -125,7 +143,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         );
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.notifications_none_outlined,
                         size: 34,
                         color: ColorPallete.white,
@@ -133,11 +151,11 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
 
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  padding: EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -153,9 +171,8 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Column(
-                    spacing: 4,
-                    children: [
-                      Text(
+                    children: [ 
+                      const Text(
                         "Total Uang",
                         style: TextStyle(
                           fontSize: 18.0,
@@ -165,14 +182,13 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       Text(
                         formatRupiah(totalUang),
-                        // "Rp0",
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w600,
                           color: ColorPallete.black,
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -181,25 +197,23 @@ class _MainScreenState extends State<MainScreen> {
                               Container(
                                 width: 28,
                                 height: 28,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFD8F5C7),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD8F5C7),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Center(
+                                child: const Center(
                                   child: Icon(
                                     CupertinoIcons.arrow_down,
-                                    color: const Color(0xFF2D4C2D),
+                                    color: Color(0xFF2D4C2D),
                                     size: 18,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12.0),
+                              const SizedBox(width: 12.0),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  Text(
+                                children: [ 
+                                  const Text(
                                     "Pendapatan",
                                     style: TextStyle(
                                       fontSize: 16.0,
@@ -209,7 +223,7 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                   Text(
                                     formatRupiah(totalIncome),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
                                       color: ColorPallete.black,
@@ -225,25 +239,23 @@ class _MainScreenState extends State<MainScreen> {
                               Container(
                                 width: 28,
                                 height: 28,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFD8F5C7),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD8F5C7),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Center(
+                                child: const Center(
                                   child: Icon(
                                     CupertinoIcons.arrow_up,
-                                    color: const Color(0xFFD84747),
+                                    color: Color(0xFFD84747),
                                     size: 18,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12.0),
+                              const SizedBox(width: 12.0),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  Text(
+                                children: [ 
+                                  const Text(
                                     "Pengeluaran",
                                     style: TextStyle(
                                       fontSize: 16.0,
@@ -253,8 +265,7 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                   Text(
                                     formatRupiah(totalExpense),
-                                    // "Rp0",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
                                       color: ColorPallete.black,
@@ -269,12 +280,12 @@ class _MainScreenState extends State<MainScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 36.0),
+                const SizedBox(height: 36.0),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       "Transaksi Terbaru",
                       style: TextStyle(
                         fontSize: 20.0,
@@ -290,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "Lihat semua",
                         style: TextStyle(
                           fontSize: 16.0,
@@ -302,7 +313,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 transaksi.isEmpty
                     ? const SizedBox(height: 300, child: EmptyState())
                     : ListView.builder(

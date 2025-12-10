@@ -25,10 +25,10 @@ class TransactionService {
         'description': description,
         'amount': amount,
         'date': date.toIso8601String(),
-      });
+      }).select();
 
       print("DEBUG: addTransaction - Response: $response");
-      return true;
+      return response is List && response.isNotEmpty;
     } catch (e) {
       print("DEBUG: addTransaction - Error: $e");
       return false;
