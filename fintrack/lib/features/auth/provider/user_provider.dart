@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fintrack/core/supabase_config.dart';
 
 class UserProvider extends ChangeNotifier {
-  String _username = "Hamba Allah";
+  String _username = "User";
   String _email = "";
   File? _profilePhoto;
   String? _profilePhotoUrl;
@@ -31,7 +31,52 @@ class UserProvider extends ChangeNotifier {
           _profilePhotoUrl = data['photo_url'];
           _profilePhoto = null;
         } else {
-          print("DEBUG: User row not found in table. Using defaults.");
+          print("DEBUG: User row not found in table. Creating default row...");
+
+          // GENERATE USERNAME FROM EMAIL
+          // Example: "putrifajarromadhon@gmail.com" -> "Putrifajarromadhon"
+          String defaultName = "User";
+          if (_email.isNotEmpty) {
+            final namePart = _email.split('@').first;
+            // Capitalize first letter (optional, looks nicer)
+            defaultName = namePart.isNotEmpty
+                ? "${namePart[0].toUpperCase()}${namePart.substring(1)}"
+                : "User";
+          }
+
+          try {
+            await SupabaseConfig.client.from('users').upsert({
+              'id': user.id,
+              'email': user.email,
+              'name': defaultName,
+              'created_at': DateTime.now().toIso8601String(),
+            });
+            _username = defaultName;
+            print(
+              "DEBUG: User row created successfully with name: $defaultName",
+            );
+          } catch (insertError) {
+            print("DEBUG: Failed to create user row: $insertError");
+
+            // HANDLE CONFLICT: If Email exists but ID is different
+            if (insertError.toString().contains("users_email_key")) {
+              print(
+                "DEBUG: Detected orphaned row with same email. Claiming it...",
+              );
+              try {
+                // Update the EXISTING row with this email to have the NEW ID
+                await SupabaseConfig.client
+                    .from('users')
+                    .update({'id': user.id}) // CLAIM THE ROW
+                    .eq('email', user.email!);
+
+                print("DEBUG: Orphaned row claimed successfully. Reloading...");
+                return loadUserData();
+              } catch (claimError) {
+                print("DEBUG: Failed to claim orphaned row: $claimError");
+              }
+            }
+          }
         }
       } catch (e) {
         print("DEBUG: Failed to load user data: $e");
@@ -51,7 +96,7 @@ class UserProvider extends ChangeNotifier {
         print("DEBUG: Attempting to UPSERT users table...");
         await SupabaseConfig.client.from('users').upsert({
           'id': user.id,
-          'email': user.email, // Ensure email is present
+          'email': user.email,
           'name': newUsername,
         });
 
@@ -95,7 +140,7 @@ class UserProvider extends ChangeNotifier {
           'photo_url': imageUrl,
         };
 
-        if (_username.isNotEmpty && _username != "Hamba Allah") {
+        if (_username.isNotEmpty && _username != "User") {
           data['name'] = _username;
         }
 
@@ -130,5 +175,14 @@ class UserProvider extends ChangeNotifier {
         print("DEBUG: Failed to remove profile photo: $e");
       }
     }
+  }
+
+  void resetState() {
+    _username = "User";
+    _email = "";
+    _profilePhoto = null;
+    _profilePhotoUrl = null;
+    print("DEBUG: UserProvider state reset.");
+    notifyListeners();
   }
 }

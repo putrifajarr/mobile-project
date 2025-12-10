@@ -8,9 +8,41 @@ import 'package:fintrack/features/auth/view/login_screen.dart';
 import 'package:fintrack/features/auth/view/register_screen.dart';
 import 'package:fintrack/features/splash/view/splash_screen.dart';
 import 'package:fintrack/core/supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:fintrack/features/auth/provider/user_provider.dart';
+import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+import 'package:fintrack/features/budget/controllers/budget_provider.dart';
 
-class MyAppView extends StatelessWidget {
+class MyAppView extends StatefulWidget {
   const MyAppView({super.key});
+
+  @override
+  State<MyAppView> createState() => _MyAppViewState();
+}
+
+class _MyAppViewState extends State<MyAppView> {
+  @override
+  void initState() {
+    super.initState();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    SupabaseConfig.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.signedOut) {
+        print("DEBUG: Auth Listener - User Signed Out. Resetting Providers...");
+        if (mounted) {
+          // Explicitly reset all providers to clear old user data
+          // This prevents "Data Leak" where User B sees User A's data
+          Provider.of<UserProvider>(context, listen: false).resetState();
+          Provider.of<TransactionProvider>(context, listen: false).resetState();
+          Provider.of<BudgetProvider>(context, listen: false).resetState();
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -66,11 +66,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           print("DEBUG: Insert into users table failed after OTP: $e");
         }
 
-        // 3. Navigasi ke main app dan hapus semua rute sebelumnya
+        // Navigasi ke main app
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Verifikasi berhasil! Selamat datang."),
             backgroundColor: Color(0xFF9CFF57),
+            behavior: SnackBarBehavior.floating,
           ),
         );
         // Menggunakan pushNamedAndRemoveUntil agar tidak bisa kembali ke register

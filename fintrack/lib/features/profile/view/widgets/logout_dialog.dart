@@ -1,6 +1,10 @@
 import 'package:fintrack/features/auth/view/login_screen.dart';
 import 'package:fintrack/core/supabase_config.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fintrack/features/auth/provider/user_provider.dart';
+import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
+import 'package:fintrack/features/budget/controllers/budget_provider.dart';
 
 void showLogoutDialog(BuildContext context) {
   showDialog(
@@ -62,6 +66,20 @@ void showLogoutDialog(BuildContext context) {
                 onPressed: () async {
                   await SupabaseConfig.client.auth.signOut();
                   if (context.mounted) {
+                    // Reset all providers to clear previous user's state
+                    Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    ).resetState();
+                    Provider.of<TransactionProvider>(
+                      context,
+                      listen: false,
+                    ).resetState();
+                    Provider.of<BudgetProvider>(
+                      context,
+                      listen: false,
+                    ).resetState();
+
                     Navigator.pop(context);
                     Navigator.pushAndRemoveUntil(
                       context,

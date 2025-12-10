@@ -83,4 +83,11 @@ class TransactionProvider with ChangeNotifier {
       .fold(0, (s, t) => s + t.amount);
 
   double get totalBalance => totalIncome - totalExpense;
+
+  void resetState() {
+    _transactions = [];
+    _categories = [];
+    print("DEBUG: TransactionProvider state reset.");
+    notifyListeners();
+  }
 }

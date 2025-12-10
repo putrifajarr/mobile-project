@@ -47,6 +47,11 @@ class TransactionService {
       print("DEBUG: addTransaction - No user logged in!");
       return false;
     }
+    
+    // VERIFIKASI USER ID (User Request)
+    print("DEBUG: addTransaction - Auth Check: CurrentUser.id = $userId");
+    print("DEBUG: addTransaction - Payload user_id = $userId");
+
 
     final dataToInsert = {
       'user_id': userId,
@@ -64,7 +69,7 @@ class TransactionService {
       final isSuccess = response is List && response.isNotEmpty;
       
       if (isSuccess) {
-        // 2. JIKA BERHASIL, PANGGIL EDGE FUNCTION (async, tidak memblokir insert)
+        // JIKA BERHASIL, PANGGIL EDGE FUNCTION (async, tidak memblokir insert)
         _notifyRealtime(response.first as Map<String, dynamic>);
       }
       
@@ -115,6 +120,9 @@ class TransactionService {
     required double amount,
     required DateTime date,
   }) async {
+    final userId = supabase.auth.currentUser?.id;
+    print("DEBUG: updateTransaction - Auth Check: CurrentUser.id = $userId");
+    
     try {
       await supabase
           .from('transactions')

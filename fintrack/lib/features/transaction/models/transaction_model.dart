@@ -9,7 +9,6 @@ class TransactionModel {
   final DateTime date;
   final DateTime createdAt;
 
-  // Optional: Populated when fetching with join
   final CategoryModel? category;
 
   TransactionModel({
