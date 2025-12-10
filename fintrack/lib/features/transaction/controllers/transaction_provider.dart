@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../services/transaction_service.dart';
+import '../../budget/controllers/budget_provider.dart';
+import '../../../services/notification_service.dart';
 
 class TransactionProvider with ChangeNotifier {
   final TransactionService _service = TransactionService();
+  final NotificationService _notificationService = NotificationService();
 
   List<TransactionModel> _transactions = [];
   List<TransactionModel> get transactions => _transactions;
@@ -38,8 +42,18 @@ class TransactionProvider with ChangeNotifier {
   }
 
   /// TAMBAH TRANSAKSI
-  Future<void> add(TransactionModel trx) async {
+  Future<void> add(TransactionModel trx, BuildContext context) async {
     print("DEBUG: Provider adding transaction...");
+
+    // TRIGGER 4: Large Transaction Alert
+    if (trx.amount > 1000000) {
+      await _notificationService.showNotification(
+        id: (DateTime.now().millisecondsSinceEpoch % 2147483647),
+        title: "Peringatan Transaksi Besar",
+        body: "Anda baru saja mencatat transaksi > 1,000,000",
+      );
+    }
+
     final success = await _service.addTransaction(
       categoryId: trx.categoryId,
       description: trx.description,
@@ -50,6 +64,21 @@ class TransactionProvider with ChangeNotifier {
 
     if (success) {
       await loadLatest();
+
+      // TRIGGER 1 & 2: Check Budget Health
+      if (context.mounted) {
+        // Find Category Name from ID
+        final cat = _categories.firstWhere(
+          (c) => c.id == trx.categoryId,
+          orElse: () => CategoryModel(id: 0, name: '', type: ''),
+        );
+        if (cat.name.isNotEmpty && cat.type == 'expense') {
+          await Provider.of<BudgetProvider>(
+            context,
+            listen: false,
+          ).checkBudgetHealth(cat.name, trx.amount);
+        }
+      }
     }
   }
 

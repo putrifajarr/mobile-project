@@ -13,14 +13,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fintrack/features/transaction/controllers/transaction_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:fintrack/core/messaging_service.dart'; 
+import 'package:fintrack/core/messaging_service.dart';
+import 'package:fintrack/features/notification/providers/notification_provider.dart';
 // Tambahan untuk memperbaiki error: import yang tidak lengkap/kosong
 // import 'package:fintrack/'; <--- BARIS INI DIHAPUS
 
 // --- TAMBAHAN WAJIB (Mengatasi Anggaran tidak berubah) ---
-import 'package:fintrack/features/budget/controllers/budget_provider.dart'; 
+import 'package:fintrack/features/budget/controllers/budget_provider.dart';
 // --- END TAMBAHAN ---
-
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -30,7 +30,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  
   @override
   void initState() {
     super.initState();
@@ -38,17 +37,20 @@ class _MainScreenState extends State<MainScreen> {
     Future.microtask(() {
       // 1. Memuat Transaksi (Memicu refresh Transaksi Terbaru)
       context.read<TransactionProvider>().loadLatest();
-      
+
       // 2. Memuat Data Pengguna
       context.read<UserProvider>().loadUserData();
 
       // 3. Memuat Anggaran (Memastikan persentase Anggaran berubah)
       // Asumsi fungsi di BudgetProvider Anda adalah 'loadBudgets'
-      context.read<BudgetProvider>().loadBudgets(); 
+      context.read<BudgetProvider>().loadBudgets();
+
+      // Fetch Notifications
+      context.read<NotificationProvider>().fetchNotifications();
 
       // 4. FASE A & B: PANGGIL SERVICE NOTIFIKASI
       final messagingService = MessagingService();
-      messagingService.saveFCMToken(); 
+      messagingService.saveFCMToken();
       messagingService.setupInteractions(context);
     });
   }
@@ -75,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
               const Color.fromRGBO(10, 16, 3, 0.2),
               const Color.fromRGBO(10, 16, 3, 0.0),
             ],
-            transform: GradientRotation(6 * (math.pi / 180)), 
+            transform: GradientRotation(6 * (math.pi / 180)),
           ),
         ),
         child: Padding(
@@ -93,7 +95,9 @@ class _MainScreenState extends State<MainScreen> {
                           builder: (context, userProvider, child) {
                             ImageProvider backgroundImage;
                             if (userProvider.profilePhoto != null) {
-                              backgroundImage = FileImage(userProvider.profilePhoto!);
+                              backgroundImage = FileImage(
+                                userProvider.profilePhoto!,
+                              );
                             } else if (userProvider.profilePhotoUrl != null &&
                                 userProvider.profilePhotoUrl!.isNotEmpty) {
                               backgroundImage = NetworkImage(
@@ -143,10 +147,34 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         );
                       },
-                      child: const Icon(
-                        Icons.notifications_none_outlined,
-                        size: 34,
-                        color: ColorPallete.white,
+                      child: Consumer<NotificationProvider>(
+                        builder: (context, notifProvider, child) {
+                          return Stack(
+                            children: [
+                              const Icon(
+                                Icons.notifications_none_outlined,
+                                size: 34,
+                                color: ColorPallete.white,
+                              ),
+                              if (notifProvider.unreadCount > 0)
+                                Positioned(
+                                  right: 2,
+                                  top: 2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 10,
+                                      minHeight: 10,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -155,7 +183,10 @@ class _MainScreenState extends State<MainScreen> {
 
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 28,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -171,7 +202,7 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Column(
-                    children: [ 
+                    children: [
                       const Text(
                         "Total Uang",
                         style: TextStyle(
@@ -212,7 +243,7 @@ class _MainScreenState extends State<MainScreen> {
                               const SizedBox(width: 12.0),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [ 
+                                children: [
                                   const Text(
                                     "Pendapatan",
                                     style: TextStyle(
@@ -254,7 +285,7 @@ class _MainScreenState extends State<MainScreen> {
                               const SizedBox(width: 12.0),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [ 
+                                children: [
                                   const Text(
                                     "Pengeluaran",
                                     style: TextStyle(
@@ -346,7 +377,7 @@ class _MainScreenState extends State<MainScreen> {
                                     context,
                                     message: 'Transaksi berhasil dihapus',
                                     onUndo: () {
-                                      provider.add(deletedTransaction);
+                                      provider.add(deletedTransaction, context);
                                     },
                                   );
                                 }

@@ -117,7 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             context,
                             message: 'Transaksi berhasil dihapus',
                             onUndo: () {
-                              provider.add(deletedTransaction);
+                              provider.add(deletedTransaction, context);
                             },
                           );
                         }

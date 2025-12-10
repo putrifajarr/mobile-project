@@ -453,7 +453,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (widget.isEdit) {
       await provider.updateTransaction(trx);
     } else {
-      await provider.add(trx);
+      await provider.add(trx, context);
       // await provider.updateBudgetFromTransaction(trx); // Removed as it wasn't implemented yet
     }
 
