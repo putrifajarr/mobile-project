@@ -9,22 +9,26 @@ class BudgetService {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return false;
 
-    final response = await supabase.from('budgets').insert({
-      'user_id': userId,
-      'name': budget.nama,
-      'category': budget.kategori,
-      'amount': budget.jumlahAnggaran,
-      'start_date': budget.tanggalMulai.toIso8601String(),
-      'end_date': budget.tanggalAkhir.toIso8601String(),
-    });
-
-    if (response.error != null) {
+    try {
+      // Menggunakan .select() untuk memastikan respons yang konsisten pada sukses
+      await supabase.from('budgets').insert({
+        'user_id': userId,
+        'name': budget.nama,
+        'category': budget.kategori,
+        'amount': budget.jumlahAnggaran,
+        'start_date': budget.tanggalMulai.toIso8601String(),
+        'end_date': budget.tanggalAkhir.toIso8601String(),
+      }).select(); 
+      // Jika tidak ada error yang di-throw, maka sukses
+      return true;
+    } catch (e) {
+      // Menangkap error jika ada kegagalan insert
+      print("DEBUG: addBudget - Error: $e");
       return false;
     }
-    return true;
   }
 
-  // <--- TAMBAHAN UNTUK UPDATE --->
+  // <--- TAMBAHAN UNTUK UPDATE (Koreksi format respons) --->
   Future<bool> updateBudget(BudgetModel budget) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return false;
@@ -39,7 +43,7 @@ class BudgetService {
         'end_date': budget.tanggalAkhir.toIso8601String(),
       }).match({
         'id': budget.id,
-        'user_id': userId, // Memastikan hanya user yang bersangkutan yang bisa update
+        'user_id': userId,
       });
       return true;
     } catch (e) {
@@ -77,7 +81,7 @@ class BudgetService {
 
       if (transactionResponse.isEmpty) return 0.0;
 
-      final List<dynamic> data = transactionResponse as List<dynamic>;
+      final List<dynamic> data = transactionResponse; // Tipe sudah List<dynamic>
       final total = data.fold<double>(
         0.0,
         (sum, item) => sum + (item['amount'] as num).toDouble(),
@@ -94,44 +98,55 @@ class BudgetService {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    final response = await supabase
-        .from('budgets')
-        .select()
-        .eq('user_id', userId)
-        .order('start_date', ascending: false);
+    // Menggunakan try-catch untuk menanggulangi error Supabase
+    try {
+        final response = await supabase
+            .from('budgets')
+            .select()
+            .eq('user_id', userId)
+            .order('start_date', ascending: false);
+        
+        final List<dynamic> rawData = response as List<dynamic>;
+        final List<BudgetModel> budgets = [];
 
-    final List<dynamic> rawData = response as List<dynamic>;
-    final List<BudgetModel> budgets = [];
+        // Proses setiap anggaran secara asinkron
+        for (var e in rawData) {
+        final budgetModel = BudgetModel(
+            id: e['id'],
+            nama: e['name'],
+            kategori: e['category'],
+            jumlahAnggaran: (e['amount'] as num).toDouble(),
+            tanggalMulai: DateTime.parse(e['start_date']),
+            tanggalAkhir: DateTime.parse(e['end_date']),
+            totalDipakai: 0, 
+        );
 
-    // Proses setiap anggaran secara asinkron
-    for (var e in rawData) {
-      final budgetModel = BudgetModel(
-        id: e['id'],
-        nama: e['name'],
-        kategori: e['category'],
-        jumlahAnggaran: (e['amount'] as num).toDouble(),
-        tanggalMulai: DateTime.parse(e['start_date']),
-        tanggalAkhir: DateTime.parse(e['end_date']),
-        totalDipakai: 0, 
-      );
+        // Panggil fungsi hitung untuk mendapatkan total pengeluaran
+        final spent = await _calculateTotalSpent(
+            budgetModel.kategori,
+            budgetModel.tanggalMulai,
+            budgetModel.tanggalAkhir,
+        );
+        
+        // Update nilai totalDipakai sebelum ditambahkan ke list
+        budgetModel.totalDipakai = spent;
+        budgets.add(budgetModel);
+        }
 
-      // Panggil fungsi hitung untuk mendapatkan total pengeluaran
-      final spent = await _calculateTotalSpent(
-        budgetModel.kategori,
-        budgetModel.tanggalMulai,
-        budgetModel.tanggalAkhir,
-      );
-      
-      // Update nilai totalDipakai sebelum ditambahkan ke list
-      budgetModel.totalDipakai = spent;
-      budgets.add(budgetModel);
+        return budgets;
+    } catch (e) {
+        print("DEBUG: getBudgets - Error: $e");
+        return [];
     }
-
-    return budgets;
   }
 
   Future<bool> deleteBudget(String id) async {
-    final response = await supabase.from('budgets').delete().eq('id', id);
-    return response.error == null;
+    try {
+        await supabase.from('budgets').delete().eq('id', id);
+        return true;
+    } catch (e) {
+        print("DEBUG: deleteBudget - Error: $e");
+        return false;
+    }
   }
 }

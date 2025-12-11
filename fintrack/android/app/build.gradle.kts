@@ -1,3 +1,5 @@
+// File: android/app/build.gradle (LEVEL APLIKASI)
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -12,6 +14,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // --- END TAMBAHAN ---
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -21,10 +25,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.fintrack"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -33,8 +34,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -42,4 +41,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // --- TAMBAHAN WAJIB UNTUK DESUGARING (Langkah 2 - Dependency) ---
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // --- END TAMBAHAN ---
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 }
