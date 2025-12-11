@@ -35,6 +35,10 @@ class BudgetProvider with ChangeNotifier {
 
   // Called whenever a transaction is added
   Future<void> checkBudgetHealth(String category, double newAmount) async {
+    print(
+      "DEBUG: checkBudgetHealth called for $category with amount $newAmount",
+    );
+
     // Find active budgets for this category
     final now = DateTime.now();
     final activeBudgets = _budgets.where((b) {
@@ -43,13 +47,24 @@ class BudgetProvider with ChangeNotifier {
           now.isBefore(b.tanggalAkhir);
     }).toList();
 
-    for (var b in activeBudgets) {
-      final used = b.totalDipakai;
-      final limit = b.jumlahAnggaran;
-      final ratio = used / limit;
+    print("DEBUG: Found ${activeBudgets.length} active budgets for $category");
 
-      // Trigger 1: WARNING (>= 80%)
-      if (ratio >= 0.8 && !b.notif90Sent) {
+    for (var b in activeBudgets) {
+      // CRITICAL FIX: Calculate total used including the NEW transaction
+      // because _budgets list might be stale until next reload.
+      final currentUsed = b.totalDipakai + newAmount;
+      final limit = b.jumlahAnggaran;
+      final ratio = currentUsed / limit;
+
+      print(
+        "DEBUG: Budget '${b.nama}' - Used: $currentUsed / $limit (Ratio: ${(ratio * 100).toStringAsFixed(1)}%)",
+      );
+      print("DEBUG: Flags - 90: ${b.notif90Sent}, 100: ${b.notif100Sent}");
+
+      // Trigger 1: WARNING (>= 80% to 90% logic)
+      // Requirement: "Trigger Warning" when >= 90%
+      if (ratio >= 0.9 && !b.notif90Sent) {
+        print("DEBUG: Triggering 90% Notification!");
         await _notificationService.showNotification(
           id: b.id.hashCode,
           title: "Peringatan Anggaran: ${b.kategori}",
@@ -60,7 +75,8 @@ class BudgetProvider with ChangeNotifier {
       }
 
       // Trigger 2: EXCEEDED (> 100%)
-      if (used > limit && !b.notif100Sent) {
+      if (currentUsed > limit && !b.notif100Sent) {
+        print("DEBUG: Triggering 100% Notification!");
         await _notificationService.showNotification(
           id: b.id.hashCode + 1, // distinct ID
           title: "Peringatan Anggaran: ${b.kategori}",
@@ -78,18 +94,22 @@ class BudgetProvider with ChangeNotifier {
     }
   }
 
+  // <--- TAMBAHAN: UPDATE LOGIC DI PROVIDER --->
   Future<void> updateBudget(BudgetModel budget) async {
     final success = await _service.updateBudget(budget);
     if (success) {
       await loadBudgets();
     }
   }
+  // <--- END TAMBAHAN --->
 
   Future<void> deleteBudget(String id) async {
     final success = await _service.deleteBudget(id);
     if (success) {
+      // Optimistic update for UI responsiveness
       _budgets.removeWhere((element) => element.id == id);
       notifyListeners();
+      await loadBudgets(); // Sync with server for consistency
     }
   }
 

@@ -78,7 +78,7 @@ void showLogoutDialog(BuildContext context) {
                     Provider.of<BudgetProvider>(
                       context,
                       listen: false,
-                    ).resetState();
+                    );
 
                     Navigator.pop(context);
                     Navigator.pushAndRemoveUntil(

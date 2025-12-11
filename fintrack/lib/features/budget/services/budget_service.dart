@@ -9,45 +9,42 @@ class BudgetService {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return false;
 
-    final response = await supabase.from('budgets').insert({
-      'user_id': userId,
-      'name': budget.nama,
-      'category': budget.kategori,
-      'amount': budget.jumlahAnggaran,
-      'start_date': budget.tanggalMulai.toIso8601String(),
-      'end_date': budget.tanggalAkhir.toIso8601String(),
-      'notif_90_sent': budget.notif90Sent,
-      'notif_100_sent': budget.notif100Sent,
-      'notif_end_sent': budget.notifEndSent,
-    });
-
-    if (response.error != null) {
+    try {
+      // Menggunakan .select() untuk memastikan respons yang konsisten pada sukses
+      await supabase.from('budgets').insert({
+        'user_id': userId,
+        'name': budget.nama,
+        'category': budget.kategori,
+        'amount': budget.jumlahAnggaran,
+        'start_date': budget.tanggalMulai.toIso8601String(),
+        'end_date': budget.tanggalAkhir.toIso8601String(),
+      }).select(); 
+      // Jika tidak ada error yang di-throw, maka sukses
+      return true;
+    } catch (e) {
+      // Menangkap error jika ada kegagalan insert
+      print("DEBUG: addBudget - Error: $e");
       return false;
     }
-    return true;
   }
 
-  // <--- TAMBAHAN UNTUK UPDATE --->
+  // <--- TAMBAHAN UNTUK UPDATE (Koreksi format respons) --->
   Future<bool> updateBudget(BudgetModel budget) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return false;
 
     try {
       // Melakukan UPDATE ke tabel 'budgets'
-      await supabase
-          .from('budgets')
-          .update({
-            'name': budget.nama,
-            'category': budget.kategori,
-            'amount': budget.jumlahAnggaran,
-            'start_date': budget.tanggalMulai.toIso8601String(),
-            'end_date': budget.tanggalAkhir.toIso8601String(),
-          })
-          .match({
-            'id': budget.id,
-            'user_id':
-                userId, // Memastikan hanya user yang bersangkutan yang bisa update
-          });
+      await supabase.from('budgets').update({
+        'name': budget.nama,
+        'category': budget.kategori,
+        'amount': budget.jumlahAnggaran,
+        'start_date': budget.tanggalMulai.toIso8601String(),
+        'end_date': budget.tanggalAkhir.toIso8601String(),
+      }).match({
+        'id': budget.id,
+        'user_id': userId,
+      });
       return true;
     } catch (e) {
       print("DEBUG: updateBudget - Error: $e");
@@ -166,10 +163,7 @@ class BudgetService {
 
   // <--- FUNGSI PEMBANTU UNTUK MENGHITUNG TOTAL DIPAKAI --->
   Future<double> _calculateTotalSpent(
-    String categoryName,
-    DateTime start,
-    DateTime end,
-  ) async {
+      String categoryName, DateTime start, DateTime end) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return 0.0;
 
@@ -196,7 +190,7 @@ class BudgetService {
 
       if (transactionResponse.isEmpty) return 0.0;
 
-      final List<dynamic> data = transactionResponse as List<dynamic>;
+      final List<dynamic> data = transactionResponse; // Tipe sudah List<dynamic>
       final total = data.fold<double>(
         0.0,
         (sum, item) => sum + (item['amount'] as num).toDouble(),
@@ -213,47 +207,55 @@ class BudgetService {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    final response = await supabase
-        .from('budgets')
-        .select()
-        .eq('user_id', userId)
-        .order('start_date', ascending: false);
+    // Menggunakan try-catch untuk menanggulangi error Supabase
+    try {
+        final response = await supabase
+            .from('budgets')
+            .select()
+            .eq('user_id', userId)
+            .order('start_date', ascending: false);
+        
+        final List<dynamic> rawData = response as List<dynamic>;
+        final List<BudgetModel> budgets = [];
 
-    final List<dynamic> rawData = response as List<dynamic>;
-    final List<BudgetModel> budgets = [];
+        // Proses setiap anggaran secara asinkron
+        for (var e in rawData) {
+        final budgetModel = BudgetModel(
+            id: e['id'],
+            nama: e['name'],
+            kategori: e['category'],
+            jumlahAnggaran: (e['amount'] as num).toDouble(),
+            tanggalMulai: DateTime.parse(e['start_date']),
+            tanggalAkhir: DateTime.parse(e['end_date']),
+            totalDipakai: 0, 
+        );
 
-    // Proses setiap anggaran secara asinkron
-    for (var e in rawData) {
-      final budgetModel = BudgetModel(
-        id: e['id'],
-        nama: e['name'],
-        kategori: e['category'],
-        jumlahAnggaran: (e['amount'] as num).toDouble(),
-        tanggalMulai: DateTime.parse(e['start_date']),
-        tanggalAkhir: DateTime.parse(e['end_date']),
-        totalDipakai: 0,
-        notif90Sent: e['notif_90_sent'] ?? false,
-        notif100Sent: e['notif_100_sent'] ?? false,
-        notifEndSent: e['notif_end_sent'] ?? false,
-      );
+        // Panggil fungsi hitung untuk mendapatkan total pengeluaran
+        final spent = await _calculateTotalSpent(
+            budgetModel.kategori,
+            budgetModel.tanggalMulai,
+            budgetModel.tanggalAkhir,
+        );
+        
+        // Update nilai totalDipakai sebelum ditambahkan ke list
+        budgetModel.totalDipakai = spent;
+        budgets.add(budgetModel);
+        }
 
-      // Panggil fungsi hitung untuk mendapatkan total pengeluaran
-      final spent = await _calculateTotalSpent(
-        budgetModel.kategori,
-        budgetModel.tanggalMulai,
-        budgetModel.tanggalAkhir,
-      );
-
-      // Update nilai totalDipakai sebelum ditambahkan ke list
-      budgetModel.totalDipakai = spent;
-      budgets.add(budgetModel);
+        return budgets;
+    } catch (e) {
+        print("DEBUG: getBudgets - Error: $e");
+        return [];
     }
-
-    return budgets;
   }
 
   Future<bool> deleteBudget(String id) async {
-    final response = await supabase.from('budgets').delete().eq('id', id);
-    return response.error == null;
+    try {
+        await supabase.from('budgets').delete().eq('id', id);
+        return true;
+    } catch (e) {
+        print("DEBUG: deleteBudget - Error: $e");
+        return false;
+    }
   }
 }

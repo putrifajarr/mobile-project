@@ -4,5 +4,6 @@
   "dart.flutterHotReloadOnSave": "all",
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 300,
-  "files.autoSaveWhenNoErrors": false
+  "files.autoSaveWhenNoErrors": false,
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -8,7 +8,6 @@ class BudgetModel {
   final DateTime tanggalMulai;
   final DateTime tanggalAkhir;
   double totalDipakai;
-
   final bool notif90Sent;
   final bool notif100Sent;
   final bool notifEndSent;
